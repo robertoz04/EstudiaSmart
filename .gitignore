@@ -25,3 +25,14 @@ replay_pid*
 
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
+
+# Archivos compilados
+*.jar
+*.class
+
+# Carpetas de compilación
+out/
+build/
+
+# Configuración local de VS Code
+.vscode/
