@@ -1,6 +1,4 @@
-import model.Administrador
-import model.Estudiante
-import model.Usuario
+import service.AuthService
 
 fun main() {
 
@@ -8,33 +6,62 @@ fun main() {
     println("          ESTUDIASMART")
     println("================================")
 
-    val estudiante = Estudiante(
-        id = 1,
-        nombre = "Josseline Perez",
-        correo = "josseline@estudiasmart.com",
-        contrasena = "123456"
-    )
+    val authService = AuthService()
 
-    val administrador = Administrador(
-        id = 2,
+    authService.registrarAdministrador(
         nombre = "Administrador",
         correo = "admin@estudiasmart.com",
         contrasena = "admin123"
     )
 
-    val usuarios: List<Usuario> = listOf(
-        estudiante,
-        administrador
-    )
+    try {
 
-    println("\nUSUARIOS DEL SISTEMA")
+        val estudiante = authService.registrarEstudiante(
+            nombre = "Josseline Perez",
+            correo = "josseline@estudiasmart.com",
+            contrasena = "123456"
+        )
+
+        println("\nREGISTRO")
+        println("--------------------------------")
+        println("Usuario registrado correctamente.")
+        println("Nombre: ${estudiante.nombre}")
+        println("Correo: ${estudiante.correo}")
+        println("Rol: ${estudiante.rol}")
+
+    } catch (error: IllegalArgumentException) {
+
+        println("Error al registrar usuario:")
+        println(error.message)
+    }
+
+    println("\nINICIO DE SESIÓN")
     println("--------------------------------")
 
-    usuarios.forEach { usuario ->
-        println("Nombre: ${usuario.nombre}")
-        println("Correo: ${usuario.correo}")
+    val usuario = authService.iniciarSesion(
+        correo = "josseline@estudiasmart.com",
+        contrasena = "123456"
+    )
+
+    if (usuario != null) {
+
+        println("Inicio de sesión correcto.")
+        println("Bienvenida, ${usuario.nombre}")
         println("Rol: ${usuario.rol}")
-        println(usuario.descripcionRol())
-        println()
+
+    } else {
+
+        println("Correo o contraseña incorrectos.")
+    }
+
+    println("\nUSUARIOS REGISTRADOS")
+    println("--------------------------------")
+
+    authService.listarUsuarios().forEach { usuarioRegistrado ->
+        println(
+            "${usuarioRegistrado.id} - " +
+            "${usuarioRegistrado.nombre} - " +
+            usuarioRegistrado.rol
+        )
     }
 }
