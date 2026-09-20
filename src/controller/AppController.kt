@@ -48,6 +48,7 @@ class AppController {
             println("1. Iniciar sesión")
             println("2. Registrarse")
             println("3. Salir")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             when (leerEntero()) {
@@ -57,11 +58,15 @@ class AppController {
                 2 -> registrarEstudiante()
 
                 3 -> {
-                    println("\nGracias por utilizar EstudiaSmart.")
+                    println()
+                    println("Gracias por utilizar EstudiaSmart.")
                     salir = true
                 }
 
-                else -> println("\nOpción inválida.")
+                else -> {
+                    println()
+                    println("Opción inválida. Intente nuevamente.")
+                }
             }
         }
     }
@@ -90,7 +95,8 @@ class AppController {
                 contrasena = contrasena
             )
 
-            println("\nEstudiante registrado correctamente.")
+            println()
+            println("Estudiante registrado correctamente.")
             println("ID asignado: ${estudiante.id}")
 
         } catch (error: Exception) {
@@ -117,11 +123,15 @@ class AppController {
         )
 
         if (usuario == null) {
-            println("\nCorreo o contraseña incorrectos.")
+
+            println()
+            println("Correo o contraseña incorrectos.")
+
             return
         }
 
-        println("\nBienvenido, ${usuario.nombre}.")
+        println()
+        println("Bienvenido, ${usuario.nombre}.")
 
         when (usuario) {
 
@@ -152,6 +162,7 @@ class AppController {
             println("7. ¿Qué debo estudiar hoy?")
             println("8. Reporte personal")
             println("9. Cerrar sesión")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
@@ -175,11 +186,15 @@ class AppController {
                     8 -> mostrarReportePersonal(estudiante)
 
                     9 -> {
-                        println("\nSesión cerrada correctamente.")
+                        println()
+                        println("Sesión cerrada correctamente.")
                         cerrarSesion = true
                     }
 
-                    else -> println("\nOpción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida. Intente nuevamente.")
+                    }
                 }
 
             } catch (error: Exception) {
@@ -201,47 +216,76 @@ class AppController {
             println("1. Ver usuarios registrados")
             println("2. Ver reporte general")
             println("3. Cerrar sesión")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
 
                 when (leerEntero()) {
 
-                    1 -> {
-
-                        println()
-                        println("USUARIOS REGISTRADOS")
-                        println("--------------------------------")
-
-                        authService.listarUsuarios().forEach { usuario ->
-
-                            val estado =
-                                if (usuario.activo) {
-                                    "ACTIVO"
-                                } else {
-                                    "INACTIVO"
-                                }
-
-                            println(
-                                "${usuario.id}. ${usuario.nombre} | " +
-                                "${usuario.correo} | ${usuario.rol} | $estado"
-                            )
-                        }
-                    }
+                    1 -> mostrarUsuarios()
 
                     2 -> mostrarReporteGeneral()
 
                     3 -> {
-                        println("\nSesión de administrador cerrada.")
+                        println()
+                        println("Sesión de administrador cerrada.")
                         cerrarSesion = true
                     }
 
-                    else -> println("\nOpción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida. Intente nuevamente.")
+                    }
                 }
 
             } catch (error: Exception) {
                 manejarError(error)
             }
+        }
+    }
+
+    private fun mostrarUsuarios() {
+
+        val usuarios = authService.listarUsuarios()
+
+        println()
+        println("================================")
+        println("       USUARIOS REGISTRADOS")
+        println("================================")
+
+        if (usuarios.isEmpty()) {
+
+            println("No hay usuarios registrados.")
+            return
+        }
+
+        usuarios.forEach { usuario ->
+
+            val estado =
+                if (usuario.activo) {
+                    "ACTIVO"
+                } else {
+                    "INACTIVO"
+                }
+
+            println(
+                "${usuario.id}. ${usuario.nombre}"
+            )
+
+            println(
+                "   Correo: ${usuario.correo}"
+            )
+
+            println(
+                "   Rol: ${usuario.rol}"
+            )
+
+            println(
+                "   Estado: $estado"
+            )
+
+            println("--------------------------------")
         }
     }
 
@@ -260,6 +304,7 @@ class AppController {
             println("3. Actualizar materia")
             println("4. Eliminar materia")
             println("5. Regresar")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
@@ -268,18 +313,24 @@ class AppController {
 
                     1 -> {
 
+                        println()
+                        println("CREAR MATERIA")
+                        println("--------------------------------")
+
                         print("Nombre: ")
-                        val nombre = readln()
+                        val nombre = readln().trim()
 
                         print("Descripción: ")
-                        val descripcion = readln()
+                        val descripcion = readln().trim()
 
-                        val materia = materiaService.crearMateria(
-                            estudianteId = estudiante.id,
-                            nombre = nombre,
-                            descripcion = descripcion
-                        )
+                        val materia =
+                            materiaService.crearMateria(
+                                estudianteId = estudiante.id,
+                                nombre = nombre,
+                                descripcion = descripcion
+                            )
 
+                        println()
                         println(
                             "Materia '${materia.nombre}' creada correctamente."
                         )
@@ -288,16 +339,19 @@ class AppController {
                     2 -> {
 
                         val materias =
-                            materiaService.listarMaterias(estudiante.id)
+                            materiaService.listarMaterias(
+                                estudiante.id
+                            )
+
+                        println()
+                        println("MIS MATERIAS")
+                        println("--------------------------------")
 
                         if (materias.isEmpty()) {
 
                             println("No hay materias registradas.")
 
                         } else {
-
-                            println("\nMIS MATERIAS")
-                            println("--------------------------------")
 
                             materias.forEach { materia ->
 
@@ -308,20 +362,26 @@ class AppController {
                                 println(
                                     "   ${materia.descripcion}"
                                 )
+
+                                println("--------------------------------")
                             }
                         }
                     }
 
                     3 -> {
 
+                        println()
+                        println("ACTUALIZAR MATERIA")
+                        println("--------------------------------")
+
                         print("ID de la materia: ")
                         val id = leerEntero()
 
                         print("Nuevo nombre: ")
-                        val nombre = readln()
+                        val nombre = readln().trim()
 
                         print("Nueva descripción: ")
-                        val descripcion = readln()
+                        val descripcion = readln().trim()
 
                         val resultado =
                             materiaService.actualizarMateria(
@@ -330,6 +390,8 @@ class AppController {
                                 nuevoNombre = nombre,
                                 nuevaDescripcion = descripcion
                             )
+
+                        println()
 
                         println(
                             if (resultado) {
@@ -342,6 +404,10 @@ class AppController {
 
                     4 -> {
 
+                        println()
+                        println("ELIMINAR MATERIA")
+                        println("--------------------------------")
+
                         print("ID de la materia: ")
                         val id = leerEntero()
 
@@ -350,6 +416,8 @@ class AppController {
                                 id = id,
                                 estudianteId = estudiante.id
                             )
+
+                        println()
 
                         println(
                             if (resultado) {
@@ -362,7 +430,10 @@ class AppController {
 
                     5 -> regresar = true
 
-                    else -> println("Opción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida.")
+                    }
                 }
 
             } catch (error: Exception) {
@@ -386,6 +457,7 @@ class AppController {
             println("3. Actualizar tema")
             println("4. Eliminar tema")
             println("5. Regresar")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
@@ -393,6 +465,10 @@ class AppController {
                 when (leerEntero()) {
 
                     1 -> {
+
+                        println()
+                        println("CREAR TEMA")
+                        println("--------------------------------")
 
                         print("ID de la materia: ")
                         val materiaId = leerEntero()
@@ -405,23 +481,28 @@ class AppController {
 
                         if (materia == null) {
 
-                            println("La materia indicada no existe.")
+                            println()
+                            println(
+                                "La materia indicada no existe."
+                            )
 
                         } else {
 
                             print("Nombre del tema: ")
-                            val nombre = readln()
+                            val nombre = readln().trim()
 
                             print("Descripción: ")
-                            val descripcion = readln()
+                            val descripcion = readln().trim()
 
-                            val tema = temaService.crearTema(
-                                materiaId = materiaId,
-                                estudianteId = estudiante.id,
-                                nombre = nombre,
-                                descripcion = descripcion
-                            )
+                            val tema =
+                                temaService.crearTema(
+                                    materiaId = materiaId,
+                                    estudianteId = estudiante.id,
+                                    nombre = nombre,
+                                    descripcion = descripcion
+                                )
 
+                            println()
                             println(
                                 "Tema '${tema.nombre}' creado correctamente."
                             )
@@ -439,14 +520,15 @@ class AppController {
                                 estudiante.id
                             )
 
+                        println()
+                        println("TEMAS")
+                        println("--------------------------------")
+
                         if (temas.isEmpty()) {
 
                             println("No hay temas registrados.")
 
                         } else {
-
-                            println("\nTEMAS")
-                            println("--------------------------------")
 
                             temas.forEach { tema ->
 
@@ -457,20 +539,26 @@ class AppController {
                                 println(
                                     "   ${tema.descripcion}"
                                 )
+
+                                println("--------------------------------")
                             }
                         }
                     }
 
                     3 -> {
 
+                        println()
+                        println("ACTUALIZAR TEMA")
+                        println("--------------------------------")
+
                         print("ID del tema: ")
                         val id = leerEntero()
 
                         print("Nuevo nombre: ")
-                        val nombre = readln()
+                        val nombre = readln().trim()
 
                         print("Nueva descripción: ")
-                        val descripcion = readln()
+                        val descripcion = readln().trim()
 
                         val resultado =
                             temaService.actualizarTema(
@@ -479,6 +567,8 @@ class AppController {
                                 nuevoNombre = nombre,
                                 nuevaDescripcion = descripcion
                             )
+
+                        println()
 
                         println(
                             if (resultado) {
@@ -491,6 +581,10 @@ class AppController {
 
                     4 -> {
 
+                        println()
+                        println("ELIMINAR TEMA")
+                        println("--------------------------------")
+
                         print("ID del tema: ")
                         val id = leerEntero()
 
@@ -499,6 +593,8 @@ class AppController {
                                 id = id,
                                 estudianteId = estudiante.id
                             )
+
+                        println()
 
                         println(
                             if (resultado) {
@@ -511,7 +607,10 @@ class AppController {
 
                     5 -> regresar = true
 
-                    else -> println("Opción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida.")
+                    }
                 }
 
             } catch (error: Exception) {
@@ -535,6 +634,7 @@ class AppController {
             println("3. Actualizar material")
             println("4. Eliminar material")
             println("5. Regresar")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
@@ -542,6 +642,10 @@ class AppController {
                 when (leerEntero()) {
 
                     1 -> {
+
+                        println()
+                        println("CREAR MATERIAL")
+                        println("--------------------------------")
 
                         print("ID del tema: ")
                         val temaId = leerEntero()
@@ -554,15 +658,18 @@ class AppController {
 
                         if (tema == null) {
 
-                            println("El tema indicado no existe.")
+                            println()
+                            println(
+                                "El tema indicado no existe."
+                            )
 
                         } else {
 
                             print("Título: ")
-                            val titulo = readln()
+                            val titulo = readln().trim()
 
                             print("Contenido: ")
-                            val contenido = readln()
+                            val contenido = readln().trim()
 
                             val material =
                                 materialService.crearMaterial(
@@ -572,6 +679,7 @@ class AppController {
                                     contenido = contenido
                                 )
 
+                            println()
                             println(
                                 "Material '${material.titulo}' creado correctamente."
                             )
@@ -589,14 +697,17 @@ class AppController {
                                 estudiante.id
                             )
 
+                        println()
+                        println("MATERIALES")
+                        println("--------------------------------")
+
                         if (materiales.isEmpty()) {
 
-                            println("No hay materiales registrados.")
+                            println(
+                                "No hay materiales registrados."
+                            )
 
                         } else {
-
-                            println("\nMATERIALES")
-                            println("--------------------------------")
 
                             materiales.forEach { material ->
 
@@ -607,20 +718,26 @@ class AppController {
                                 println(
                                     "   ${material.contenido}"
                                 )
+
+                                println("--------------------------------")
                             }
                         }
                     }
 
                     3 -> {
 
+                        println()
+                        println("ACTUALIZAR MATERIAL")
+                        println("--------------------------------")
+
                         print("ID del material: ")
                         val id = leerEntero()
 
                         print("Nuevo título: ")
-                        val titulo = readln()
+                        val titulo = readln().trim()
 
                         print("Nuevo contenido: ")
-                        val contenido = readln()
+                        val contenido = readln().trim()
 
                         val resultado =
                             materialService.actualizarMaterial(
@@ -629,6 +746,8 @@ class AppController {
                                 nuevoTitulo = titulo,
                                 nuevoContenido = contenido
                             )
+
+                        println()
 
                         println(
                             if (resultado) {
@@ -641,6 +760,10 @@ class AppController {
 
                     4 -> {
 
+                        println()
+                        println("ELIMINAR MATERIAL")
+                        println("--------------------------------")
+
                         print("ID del material: ")
                         val id = leerEntero()
 
@@ -649,6 +772,8 @@ class AppController {
                                 id = id,
                                 estudianteId = estudiante.id
                             )
+
+                        println()
 
                         println(
                             if (resultado) {
@@ -661,7 +786,10 @@ class AppController {
 
                     5 -> regresar = true
 
-                    else -> println("Opción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida.")
+                    }
                 }
 
             } catch (error: Exception) {
@@ -685,6 +813,7 @@ class AppController {
             println("3. Revisar flashcard")
             println("4. Ver flashcards pendientes")
             println("5. Regresar")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
@@ -697,11 +826,17 @@ class AppController {
 
                     3 -> revisarFlashcard(estudiante)
 
-                    4 -> mostrarFlashcardsPendientes(estudiante)
+                    4 ->
+                        mostrarFlashcardsPendientes(
+                            estudiante
+                        )
 
                     5 -> regresar = true
 
-                    else -> println("Opción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida.")
+                    }
                 }
 
             } catch (error: Exception) {
@@ -711,6 +846,10 @@ class AppController {
     }
 
     private fun crearFlashcard(estudiante: Estudiante) {
+
+        println()
+        println("CREAR FLASHCARD")
+        println("--------------------------------")
 
         print("ID del tema: ")
         val temaId = leerEntero()
@@ -722,7 +861,10 @@ class AppController {
             )
 
         if (tema == null) {
+
+            println()
             println("El tema indicado no existe.")
+
             return
         }
 
@@ -740,27 +882,37 @@ class AppController {
             "La respuesta no puede estar vacía."
         }
 
-        val flashcard = Flashcard(
-            id = siguienteFlashcardId++,
-            temaId = temaId,
-            pregunta = pregunta,
-            respuesta = respuesta
-        )
+        val flashcard =
+            Flashcard(
+                id = siguienteFlashcardId++,
+                temaId = temaId,
+                pregunta = pregunta,
+                respuesta = respuesta
+            )
 
         flashcards.add(flashcard)
 
+        println()
         println("Flashcard creada correctamente.")
     }
 
-    private fun listarFlashcards(estudiante: Estudiante) {
+    private fun listarFlashcards(
+        estudiante: Estudiante
+    ) {
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val tarjetas =
             flashcards.filter {
                 it.temaId in temaIds
             }
+
+        println()
+        println("MIS FLASHCARDS")
+        println("--------------------------------")
 
         if (tarjetas.isEmpty()) {
 
@@ -768,10 +920,6 @@ class AppController {
 
             return
         }
-
-        println()
-        println("MIS FLASHCARDS")
-        println("--------------------------------")
 
         tarjetas.forEach { flashcard ->
 
@@ -784,19 +932,34 @@ class AppController {
             )
 
             println(
+                "   Racha de aciertos: " +
+                flashcard.rachaAciertos
+            )
+
+            println(
                 "   Próxima revisión: " +
                 "${flashcard.proximaRevision ?: "Pendiente"}"
             )
+
+            println("--------------------------------")
         }
     }
 
-    private fun revisarFlashcard(estudiante: Estudiante) {
+    private fun revisarFlashcard(
+        estudiante: Estudiante
+    ) {
+
+        println()
+        println("REVISAR FLASHCARD")
+        println("--------------------------------")
 
         print("ID de la flashcard: ")
         val id = leerEntero()
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val flashcard =
             flashcards.find {
@@ -806,6 +969,7 @@ class AppController {
 
         if (flashcard == null) {
 
+            println()
             println("Flashcard no encontrada.")
 
             return
@@ -815,7 +979,10 @@ class AppController {
         println("Pregunta:")
         println(flashcard.pregunta)
 
-        print("\nPresione ENTER para mostrar la respuesta...")
+        println()
+        print(
+            "Presione ENTER para mostrar la respuesta..."
+        )
         readln()
 
         println()
@@ -827,38 +994,20 @@ class AppController {
         println("1. Difícil")
         println("2. Regular")
         println("3. Fácil")
+        println()
+        println(
+            "Puede escribir el número o el nombre."
+        )
         print("Opción: ")
 
-        val dificultad =
-            when (leerEntero()) {
+        val dificultad = leerDificultad()
 
-                1 -> Dificultad.DIFICIL
+        println()
+        print(
+            "¿Respondió correctamente? (s/n): "
+        )
 
-                2 -> Dificultad.REGULAR
-
-                3 -> Dificultad.FACIL
-
-                else -> throw IllegalArgumentException(
-                    "La dificultad seleccionada no es válida."
-                )
-            }
-
-        print("¿Respondió correctamente? (s/n): ")
-
-        val respuesta =
-            readln()
-                .trim()
-                .lowercase()
-
-        require(
-            respuesta == "s" ||
-            respuesta == "n"
-        ) {
-            "Debe responder s o n."
-        }
-
-        val acierto =
-            respuesta == "s"
+        val acierto = leerSiNo()
 
         flashcardService.revisarFlashcard(
             flashcard = flashcard,
@@ -866,15 +1015,30 @@ class AppController {
             acierto = acierto
         )
 
+        actualizarProgresoDesdeFlashcard(
+            temaId = flashcard.temaId
+        )
+
         println()
-        println("Revisión registrada.")
+        println("Revisión registrada correctamente.")
 
         println(
-            "Racha de aciertos: ${flashcard.rachaAciertos}"
+            "Dificultad: ${flashcard.dificultad}"
         )
 
         println(
-            "Próxima revisión: ${flashcard.proximaRevision}"
+            "Racha de aciertos: " +
+            flashcard.rachaAciertos
+        )
+
+        println(
+            "Última revisión: " +
+            flashcard.ultimaRevision
+        )
+
+        println(
+            "Próxima revisión: " +
+            flashcard.proximaRevision
         )
     }
 
@@ -883,7 +1047,9 @@ class AppController {
     ) {
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val tarjetas =
             flashcards.filter {
@@ -891,9 +1057,14 @@ class AppController {
             }
 
         val pendientes =
-            flashcardService.obtenerFlashcardsPendientes(
-                tarjetas
-            )
+            flashcardService
+                .obtenerFlashcardsPendientes(
+                    tarjetas
+                )
+
+        println()
+        println("FLASHCARDS PENDIENTES")
+        println("--------------------------------")
 
         if (pendientes.isEmpty()) {
 
@@ -902,15 +1073,18 @@ class AppController {
             return
         }
 
-        println()
-        println("FLASHCARDS PENDIENTES")
-        println("--------------------------------")
-
         pendientes.forEach {
 
             println(
                 "${it.id}. ${it.pregunta}"
             )
+
+            println(
+                "   Próxima revisión: " +
+                "${it.proximaRevision ?: "Hoy"}"
+            )
+
+            println("--------------------------------")
         }
     }
 
@@ -928,6 +1102,7 @@ class AppController {
             println("2. Listar quizzes")
             println("3. Realizar quiz")
             println("4. Regresar")
+            println("--------------------------------")
             print("Seleccione una opción: ")
 
             try {
@@ -942,7 +1117,10 @@ class AppController {
 
                     4 -> regresar = true
 
-                    else -> println("Opción inválida.")
+                    else -> {
+                        println()
+                        println("Opción inválida.")
+                    }
                 }
 
             } catch (error: Exception) {
@@ -952,6 +1130,10 @@ class AppController {
     }
 
     private fun crearQuiz(estudiante: Estudiante) {
+
+        println()
+        println("CREAR QUIZ")
+        println("--------------------------------")
 
         print("ID del tema: ")
         val temaId = leerEntero()
@@ -964,6 +1146,7 @@ class AppController {
 
         if (tema == null) {
 
+            println()
             println("El tema indicado no existe.")
 
             return
@@ -976,11 +1159,12 @@ class AppController {
             "El nombre del quiz no puede estar vacío."
         }
 
-        val quiz = Quiz(
-            id = siguienteQuizId++,
-            temaId = temaId,
-            nombre = nombre
-        )
+        val quiz =
+            Quiz(
+                id = siguienteQuizId++,
+                temaId = temaId,
+                nombre = nombre
+            )
 
         println()
         println("Ingrese 3 preguntas para el quiz.")
@@ -988,7 +1172,9 @@ class AppController {
         repeat(3) { indice ->
 
             println()
+            println("--------------------------------")
             println("Pregunta ${indice + 1}")
+            println("--------------------------------")
 
             print("Enunciado: ")
             val enunciado = readln().trim()
@@ -1015,10 +1201,12 @@ class AppController {
                 opcionC.isNotBlank() &&
                 opcionD.isNotBlank()
             ) {
-                "Las opciones de respuesta no pueden estar vacías."
+                "Las opciones no pueden estar vacías."
             }
 
-            print("Respuesta correcta (A/B/C/D): ")
+            print(
+                "Respuesta correcta (A/B/C/D): "
+            )
 
             val respuestaCorrecta =
                 leerRespuestaABCD()
@@ -1032,7 +1220,8 @@ class AppController {
                     opcionB = opcionB,
                     opcionC = opcionC,
                     opcionD = opcionD,
-                    respuestaCorrecta = respuestaCorrecta
+                    respuestaCorrecta =
+                        respuestaCorrecta
                 )
             )
         }
@@ -1043,15 +1232,23 @@ class AppController {
         println("Quiz creado correctamente.")
     }
 
-    private fun listarQuizzes(estudiante: Estudiante) {
+    private fun listarQuizzes(
+        estudiante: Estudiante
+    ) {
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val quizzesEstudiante =
             quizzes.filter {
                 it.temaId in temaIds
             }
+
+        println()
+        println("MIS QUIZZES")
+        println("--------------------------------")
 
         if (quizzesEstudiante.isEmpty()) {
 
@@ -1060,26 +1257,35 @@ class AppController {
             return
         }
 
-        println()
-        println("MIS QUIZZES")
-        println("--------------------------------")
-
         quizzesEstudiante.forEach {
 
             println(
-                "${it.id}. ${it.nombre} - " +
-                "${it.preguntas.size} preguntas"
+                "${it.id}. ${it.nombre}"
             )
+
+            println(
+                "   Preguntas: ${it.preguntas.size}"
+            )
+
+            println("--------------------------------")
         }
     }
 
-    private fun realizarQuiz(estudiante: Estudiante) {
+    private fun realizarQuiz(
+        estudiante: Estudiante
+    ) {
+
+        println()
+        println("REALIZAR QUIZ")
+        println("--------------------------------")
 
         print("ID del quiz: ")
         val quizId = leerEntero()
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val quiz =
             quizzes.find {
@@ -1089,6 +1295,7 @@ class AppController {
 
         if (quiz == null) {
 
+            println()
             println("Quiz no encontrado.")
 
             return
@@ -1097,14 +1304,24 @@ class AppController {
         val respuestas =
             mutableMapOf<Int, Char>()
 
-        quiz.preguntas.forEach { pregunta ->
+        quiz.preguntas.forEachIndexed {
+            indice,
+            pregunta ->
 
             println()
+            println("--------------------------------")
+            println(
+                "Pregunta ${indice + 1} de " +
+                quiz.preguntas.size
+            )
+            println("--------------------------------")
+
             println(pregunta.enunciado)
             println("A. ${pregunta.opcionA}")
             println("B. ${pregunta.opcionB}")
             println("C. ${pregunta.opcionC}")
             println("D. ${pregunta.opcionD}")
+
             print("Respuesta: ")
 
             respuestas[pregunta.id] =
@@ -1121,8 +1338,9 @@ class AppController {
         intentos.add(intento)
 
         println()
-        println("RESULTADO DEL QUIZ")
-        println("--------------------------------")
+        println("================================")
+        println("        RESULTADO DEL QUIZ")
+        println("================================")
 
         println(
             "Respuestas correctas: " +
@@ -1131,7 +1349,8 @@ class AppController {
         )
 
         println(
-            "Puntuación: ${"%.1f".format(intento.puntuacion)}%"
+            "Puntuación: " +
+            "${"%.1f".format(intento.puntuacion)}%"
         )
 
         println(
@@ -1143,10 +1362,13 @@ class AppController {
 
         println(
             "Preguntas falladas: " +
-            if (intento.preguntasFalladas.isEmpty()) {
+            if (
+                intento.preguntasFalladas.isEmpty()
+            ) {
                 "Ninguna"
             } else {
-                intento.preguntasFalladas.joinToString()
+                intento.preguntasFalladas
+                    .joinToString()
             }
         )
 
@@ -1167,22 +1389,9 @@ class AppController {
             }
 
         val rendimientoFlashcards =
-            if (tarjetasTema.isEmpty()) {
-
-                0.0
-
-            } else {
-
-                val tarjetasAcertadas =
-                    tarjetasTema.count {
-                        it.rachaAciertos > 0
-                    }
-
-                (
-                    tarjetasAcertadas.toDouble() /
-                    tarjetasTema.size
-                ) * 100.0
-            }
+            calcularRendimientoFlashcards(
+                tarjetasTema
+            )
 
         val progreso =
             progresos.find {
@@ -1196,8 +1405,56 @@ class AppController {
         progresoService.actualizarProgreso(
             progreso = progreso,
             precisionQuiz = puntuacion,
-            rendimientoFlashcards = rendimientoFlashcards
+            rendimientoFlashcards =
+                rendimientoFlashcards
         )
+    }
+
+    private fun actualizarProgresoDesdeFlashcard(
+        temaId: Int
+    ) {
+
+        val progreso =
+            progresos.find {
+                it.temaId == temaId
+            } ?: return
+
+        val tarjetasTema =
+            flashcards.filter {
+                it.temaId == temaId
+            }
+
+        val rendimientoFlashcards =
+            calcularRendimientoFlashcards(
+                tarjetasTema
+            )
+
+        progresoService.actualizarProgreso(
+            progreso = progreso,
+            precisionQuiz =
+                progreso.precisionQuiz,
+            rendimientoFlashcards =
+                rendimientoFlashcards
+        )
+    }
+
+    private fun calcularRendimientoFlashcards(
+        tarjetas: List<Flashcard>
+    ): Double {
+
+        if (tarjetas.isEmpty()) {
+            return 0.0
+        }
+
+        val acertadas =
+            tarjetas.count {
+                it.rachaAciertos > 0
+            }
+
+        return (
+            acertadas.toDouble() /
+            tarjetas.size
+        ) * 100.0
     }
 
     private fun mostrarProgreso(
@@ -1205,7 +1462,9 @@ class AppController {
     ) {
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val progresosEstudiante =
             progresos.filter {
@@ -1223,10 +1482,15 @@ class AppController {
                 "Todavía no existen resultados de progreso."
             )
 
+            println(
+                "Realice un quiz para comenzar."
+            )
+
             return
         }
 
-        progresosEstudiante.forEach { progreso ->
+        progresosEstudiante.forEach {
+            progreso ->
 
             val tema =
                 temaService.buscarTema(
@@ -1234,12 +1498,17 @@ class AppController {
                     estudiante.id
                 )
 
+            println()
             println(
-                "${tema?.nombre ?: "Tema ${progreso.temaId}"}"
+                tema?.nombre
+                    ?: "Tema ${progreso.temaId}"
             )
 
+            println("--------------------------------")
+
             println(
-                "Quiz: ${"%.1f".format(progreso.precisionQuiz)}%"
+                "Quiz: " +
+                "${"%.1f".format(progreso.precisionQuiz)}%"
             )
 
             println(
@@ -1248,7 +1517,8 @@ class AppController {
             )
 
             println(
-                "Dominio: ${"%.1f".format(progreso.dominio)}%"
+                "Dominio: " +
+                "${"%.1f".format(progreso.dominio)}%"
             )
 
             println(
@@ -1267,7 +1537,9 @@ class AppController {
     ) {
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val progresosEstudiante =
             progresos.filter {
@@ -1285,11 +1557,13 @@ class AppController {
         }
 
         val estados =
-            progresosEstudiante.map { progreso ->
+            progresosEstudiante.map {
+                progreso ->
 
                 val tarjetasTema =
                     flashcards.filter {
-                        it.temaId == progreso.temaId
+                        it.temaId ==
+                            progreso.temaId
                     }
 
                 val ultimaRevision =
@@ -1304,11 +1578,14 @@ class AppController {
                         .maxByOrNull {
                             when (it.dificultad) {
 
-                                Dificultad.DIFICIL -> 3
+                                Dificultad.DIFICIL ->
+                                    3
 
-                                Dificultad.REGULAR -> 2
+                                Dificultad.REGULAR ->
+                                    2
 
-                                Dificultad.FACIL -> 1
+                                Dificultad.FACIL ->
+                                    1
                             }
                         }
                         ?.dificultad
@@ -1326,15 +1603,17 @@ class AppController {
                         tema?.nombre
                             ?: "Tema ${progreso.temaId}",
                     dominio = progreso.dominio,
-                    ultimaRevision = ultimaRevision,
+                    ultimaRevision =
+                        ultimaRevision,
                     dificultad = dificultad
                 )
             }
 
         val recomendaciones =
-            recomendacionService.generarRecomendaciones(
-                temas = estados
-            )
+            recomendacionService
+                .generarRecomendaciones(
+                    temas = estados
+                )
 
         println()
         println("================================")
@@ -1345,8 +1624,10 @@ class AppController {
             indice,
             recomendacion ->
 
+            println()
             println(
-                "${indice + 1}. ${recomendacion.nombreTema}"
+                "${indice + 1}. " +
+                recomendacion.nombreTema
             )
 
             println(
@@ -1368,6 +1649,8 @@ class AppController {
                 "   Prioridad: " +
                 "${"%.1f".format(recomendacion.prioridad)}"
             )
+
+            println("--------------------------------")
         }
     }
 
@@ -1376,7 +1659,9 @@ class AppController {
     ) {
 
         val temaIds =
-            obtenerTemaIdsDelEstudiante(estudiante.id)
+            obtenerTemaIdsDelEstudiante(
+                estudiante.id
+            )
 
         val flashcardsEstudiante =
             flashcards.filter {
@@ -1389,9 +1674,11 @@ class AppController {
             }
 
         val quizIds =
-            quizzesEstudiante.map {
-                it.id
-            }.toSet()
+            quizzesEstudiante
+                .map {
+                    it.id
+                }
+                .toSet()
 
         val intentosEstudiante =
             intentos.filter {
@@ -1403,15 +1690,23 @@ class AppController {
                 it.temaId in temaIds
             }
 
-        println()
-
-        println(
+        val reporte =
             reporteService.generarReporte(
                 intentos = intentosEstudiante,
-                flashcards = flashcardsEstudiante,
-                progresos = progresosEstudiante
+                flashcards =
+                    flashcardsEstudiante,
+                progresos =
+                    progresosEstudiante
             )
-        )
+
+        val reportePersonal =
+            reporte.replace(
+                "REPORTE GENERAL ESTUDIASMART",
+                "REPORTE PERSONAL DE ESTUDIO"
+            )
+
+        println()
+        println(reportePersonal)
     }
 
     private fun mostrarReporteGeneral() {
@@ -1446,26 +1741,109 @@ class AppController {
             .toSet()
     }
 
+    private fun leerDificultad(): Dificultad {
+
+        while (true) {
+
+            val entrada =
+                readln()
+                    .trim()
+                    .lowercase()
+
+            when (entrada) {
+
+                "1",
+                "dificil",
+                "difícil" ->
+                    return Dificultad.DIFICIL
+
+                "2",
+                "regular" ->
+                    return Dificultad.REGULAR
+
+                "3",
+                "facil",
+                "fácil" ->
+                    return Dificultad.FACIL
+
+                else -> {
+
+                    println()
+                    println(
+                        "Opción inválida."
+                    )
+
+                    println(
+                        "Ingrese 1, 2, 3 o el nombre de la dificultad."
+                    )
+
+                    print("Opción: ")
+                }
+            }
+        }
+    }
+
+    private fun leerSiNo(): Boolean {
+
+        while (true) {
+
+            val respuesta =
+                readln()
+                    .trim()
+                    .lowercase()
+
+            when (respuesta) {
+
+                "s",
+                "si",
+                "sí" ->
+                    return true
+
+                "n",
+                "no" ->
+                    return false
+
+                else -> {
+
+                    println(
+                        "Respuesta inválida. Escriba s o n."
+                    )
+
+                    print(
+                        "¿Respondió correctamente? (s/n): "
+                    )
+                }
+            }
+        }
+    }
+
     private fun leerRespuestaABCD(): Char {
 
-        val respuesta =
-            readln()
-                .trim()
-                .uppercase()
+        while (true) {
 
-        require(
-            respuesta.length == 1 &&
-            respuesta[0] in listOf(
-                'A',
-                'B',
-                'C',
-                'D'
+            val respuesta =
+                readln()
+                    .trim()
+                    .uppercase()
+
+            if (
+                respuesta.length == 1 &&
+                respuesta[0] in listOf(
+                    'A',
+                    'B',
+                    'C',
+                    'D'
+                )
+            ) {
+                return respuesta[0]
+            }
+
+            println(
+                "Respuesta inválida. Ingrese A, B, C o D."
             )
-        ) {
-            "Debe ingresar A, B, C o D."
-        }
 
-        return respuesta[0]
+            print("Respuesta: ")
+        }
     }
 
     private fun leerEntero(): Int {
@@ -1473,23 +1851,34 @@ class AppController {
         val entrada =
             readlnOrNull()
                 ?.trim()
+                ?.removeSuffix(".")
 
         return entrada
             ?.toIntOrNull()
             ?: -1
     }
 
-    private fun manejarError(error: Exception) {
+    private fun manejarError(
+        error: Exception
+    ) {
 
         println()
+        println("--------------------------------")
+
         println(
-            "Error: ${error.message ?: "Error desconocido."}"
+            "Error: " +
+            (error.message
+                ?: "Error desconocido.")
         )
 
-        ErrorLogger.registrarError(error)
+        ErrorLogger.registrarError(
+            error
+        )
 
         println(
             "El error fue registrado en logs/errors.txt"
         )
+
+        println("--------------------------------")
     }
 }
