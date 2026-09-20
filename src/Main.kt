@@ -1,6 +1,6 @@
+import controller.AppController
+
 fun main() {
-    println("================================")
-    println("          ESTUDIASMART")
-    println("================================")
-    println("Integración de módulos completada correctamente.")
+    val app = AppController()
+    app.iniciar()
 }
