@@ -11,4 +11,9 @@ data class Flashcard(
     var rachaAciertos: Int = 0,
     var ultimaRevision: LocalDate? = null,
     var proximaRevision: LocalDate? = null
-)
+) : ActividadEstudio {
+
+    override fun obtenerResumen(): String {
+        return "Flashcard: $pregunta - Dificultad: $dificultad"
+    }
+}
