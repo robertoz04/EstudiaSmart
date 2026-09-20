@@ -1,4 +1,5 @@
 import service.MateriaService
+import service.TemaService
 
 fun main() {
 
@@ -7,77 +8,96 @@ fun main() {
     println("================================")
 
     val materiaService = MateriaService()
+    val temaService = TemaService()
 
     val estudianteId = 1
 
-    println("\nCREAR MATERIAS")
-    println("--------------------------------")
-
-    val programacion = materiaService.crearMateria(
-        estudianteId,
-        "Programación III",
-        "Programación orientada a objetos"
+    val materia = materiaService.crearMateria(
+        estudianteId = estudianteId,
+        nombre = "Programación III",
+        descripcion = "Programación orientada a objetos"
     )
 
-    materiaService.crearMateria(
-        estudianteId,
-        "Matemáticas",
-        "Matemática universitaria"
-    )
+    println("\nMATERIA")
+    println("--------------------------------")
+    println("${materia.id}. ${materia.nombre}")
 
-    println("Materias creadas correctamente.")
-
-    println("\nLISTAR MATERIAS")
+    println("\nCREAR TEMAS")
     println("--------------------------------")
 
-    materiaService
-        .listarMaterias(estudianteId)
-        .forEach { materia ->
+    val temaHerencia = temaService.crearTema(
+        materiaId = materia.id,
+        estudianteId = estudianteId,
+        nombre = "Herencia",
+        descripcion = "Herencia de clases en Kotlin"
+    )
 
-            println("${materia.id}. ${materia.nombre}")
-            println("   ${materia.descripcion}")
+    temaService.crearTema(
+        materiaId = materia.id,
+        estudianteId = estudianteId,
+        nombre = "Interfaces",
+        descripcion = "Uso de interfaces en Kotlin"
+    )
+
+    println("Temas creados correctamente.")
+
+    println("\nLISTAR TEMAS")
+    println("--------------------------------")
+
+    temaService
+        .listarTemas(
+            materiaId = materia.id,
+            estudianteId = estudianteId
+        )
+        .forEach { tema ->
+
+            println("${tema.id}. ${tema.nombre}")
+            println("   ${tema.descripcion}")
         }
 
-    println("\nACTUALIZAR MATERIA")
+    println("\nACTUALIZAR TEMA")
     println("--------------------------------")
 
-    val actualizada = materiaService.actualizarMateria(
-        id = programacion.id,
+    val actualizado = temaService.actualizarTema(
+        id = temaHerencia.id,
         estudianteId = estudianteId,
-        nuevoNombre = "Programación Orientada a Objetos",
-        nuevaDescripcion = "POO utilizando Kotlin"
+        nuevoNombre = "Herencia en Kotlin",
+        nuevaDescripcion = "Clases base y clases derivadas"
     )
 
     println(
-        if (actualizada)
-            "Materia actualizada correctamente."
+        if (actualizado)
+            "Tema actualizado correctamente."
         else
-            "No se encontró la materia."
+            "No se encontró el tema."
     )
 
-    println("\nELIMINAR MATERIA")
+    println("\nELIMINAR TEMA")
     println("--------------------------------")
 
-    val eliminada = materiaService.eliminarMateria(
+    val eliminado = temaService.eliminarTema(
         id = 2,
         estudianteId = estudianteId
     )
 
     println(
-        if (eliminada)
-            "Materia eliminada correctamente."
+        if (eliminado)
+            "Tema eliminado correctamente."
         else
-            "No se encontró la materia."
+            "No se encontró el tema."
     )
 
-    println("\nMATERIAS FINALES")
+    println("\nTEMAS FINALES")
     println("--------------------------------")
 
-    materiaService
-        .listarMaterias(estudianteId)
-        .forEach { materia ->
+    temaService
+        .listarTemas(
+            materiaId = materia.id,
+            estudianteId = estudianteId
+        )
+        .forEach { tema ->
 
-            println("${materia.id}. ${materia.nombre}")
-            println("   ${materia.descripcion}")
+            println("${tema.id}. ${tema.nombre}")
+            println("   ${tema.descripcion}")
         }
 }
