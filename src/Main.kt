@@ -1,5 +1,6 @@
 import service.MateriaService
 import service.TemaService
+import service.MaterialService
 
 fun main() {
 
@@ -9,6 +10,7 @@ fun main() {
 
     val materiaService = MateriaService()
     val temaService = TemaService()
+    val materialService = MaterialService()
 
     val estudianteId = 1
 
@@ -18,86 +20,89 @@ fun main() {
         descripcion = "Programación orientada a objetos"
     )
 
-    println("\nMATERIA")
-    println("--------------------------------")
-    println("${materia.id}. ${materia.nombre}")
-
-    println("\nCREAR TEMAS")
-    println("--------------------------------")
-
-    val temaHerencia = temaService.crearTema(
+    val tema = temaService.crearTema(
         materiaId = materia.id,
         estudianteId = estudianteId,
         nombre = "Herencia",
-        descripcion = "Herencia de clases en Kotlin"
+        descripcion = "Herencia en Kotlin"
     )
 
-    temaService.crearTema(
-        materiaId = materia.id,
-        estudianteId = estudianteId,
-        nombre = "Interfaces",
-        descripcion = "Uso de interfaces en Kotlin"
-    )
-
-    println("Temas creados correctamente.")
-
-    println("\nLISTAR TEMAS")
+    println("\nCREAR MATERIALES")
     println("--------------------------------")
 
-    temaService
-        .listarTemas(
-            materiaId = materia.id,
+    val material1 = materialService.crearMaterial(
+        temaId = tema.id,
+        estudianteId = estudianteId,
+        titulo = "Apunte sobre herencia",
+        contenido = "La herencia permite que una clase adquiera características de otra."
+    )
+
+    materialService.crearMaterial(
+        temaId = tema.id,
+        estudianteId = estudianteId,
+        titulo = "Ejemplo Kotlin",
+        contenido = "Una clase puede heredar utilizando dos puntos."
+    )
+
+    println("Materiales creados correctamente.")
+
+    println("\nLISTAR MATERIALES")
+    println("--------------------------------")
+
+    materialService
+        .listarMateriales(
+            temaId = tema.id,
             estudianteId = estudianteId
         )
-        .forEach { tema ->
+        .forEach { material ->
 
-            println("${tema.id}. ${tema.nombre}")
-            println("   ${tema.descripcion}")
+            println("${material.id}. ${material.titulo}")
+            println("   ${material.contenido}")
         }
 
-    println("\nACTUALIZAR TEMA")
+    println("\nACTUALIZAR MATERIAL")
     println("--------------------------------")
 
-    val actualizado = temaService.actualizarTema(
-        id = temaHerencia.id,
+    val actualizado = materialService.actualizarMaterial(
+        id = material1.id,
         estudianteId = estudianteId,
-        nuevoNombre = "Herencia en Kotlin",
-        nuevaDescripcion = "Clases base y clases derivadas"
+        nuevoTitulo = "Herencia en Kotlin",
+        nuevoContenido = "Una clase puede heredar propiedades y métodos de otra clase."
     )
 
     println(
         if (actualizado)
-            "Tema actualizado correctamente."
+            "Material actualizado correctamente."
         else
-            "No se encontró el tema."
+            "No se encontró el material."
     )
 
-    println("\nELIMINAR TEMA")
+    println("\nELIMINAR MATERIAL")
     println("--------------------------------")
 
-    val eliminado = temaService.eliminarTema(
+    val eliminado = materialService.eliminarMaterial(
         id = 2,
         estudianteId = estudianteId
     )
 
     println(
         if (eliminado)
-            "Tema eliminado correctamente."
+            "Material eliminado correctamente."
         else
-            "No se encontró el tema."
+            "No se encontró el material."
     )
 
-    println("\nTEMAS FINALES")
+    println("\nMATERIALES FINALES")
     println("--------------------------------")
 
-    temaService
-        .listarTemas(
-            materiaId = materia.id,
+    materialService
+        .listarMateriales(
+            temaId = tema.id,
             estudianteId = estudianteId
         )
-        .forEach { tema ->
+        .forEach { material ->
 
-            println("${tema.id}. ${tema.nombre}")
-            println("   ${tema.descripcion}")
+            println("${material.id}. ${material.titulo}")
+            println("   ${material.contenido}")
         }
 }
