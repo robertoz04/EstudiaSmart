@@ -1,4 +1,4 @@
-import service.AuthService
+import service.MateriaService
 
 fun main() {
 
@@ -6,62 +6,78 @@ fun main() {
     println("          ESTUDIASMART")
     println("================================")
 
-    val authService = AuthService()
+    val materiaService = MateriaService()
 
-    authService.registrarAdministrador(
-        nombre = "Administrador",
-        correo = "admin@estudiasmart.com",
-        contrasena = "admin123"
-    )
+    val estudianteId = 1
 
-    try {
-
-        val estudiante = authService.registrarEstudiante(
-            nombre = "Josseline Perez",
-            correo = "josseline@estudiasmart.com",
-            contrasena = "123456"
-        )
-
-        println("\nREGISTRO")
-        println("--------------------------------")
-        println("Usuario registrado correctamente.")
-        println("Nombre: ${estudiante.nombre}")
-        println("Correo: ${estudiante.correo}")
-        println("Rol: ${estudiante.rol}")
-
-    } catch (error: IllegalArgumentException) {
-
-        println("Error al registrar usuario:")
-        println(error.message)
-    }
-
-    println("\nINICIO DE SESIÓN")
+    println("\nCREAR MATERIAS")
     println("--------------------------------")
 
-    val usuario = authService.iniciarSesion(
-        correo = "josseline@estudiasmart.com",
-        contrasena = "123456"
+    val programacion = materiaService.crearMateria(
+        estudianteId,
+        "Programación III",
+        "Programación orientada a objetos"
     )
 
-    if (usuario != null) {
+    materiaService.crearMateria(
+        estudianteId,
+        "Matemáticas",
+        "Matemática universitaria"
+    )
 
-        println("Inicio de sesión correcto.")
-        println("Bienvenida, ${usuario.nombre}")
-        println("Rol: ${usuario.rol}")
+    println("Materias creadas correctamente.")
 
-    } else {
-
-        println("Correo o contraseña incorrectos.")
-    }
-
-    println("\nUSUARIOS REGISTRADOS")
+    println("\nLISTAR MATERIAS")
     println("--------------------------------")
 
-    authService.listarUsuarios().forEach { usuarioRegistrado ->
-        println(
-            "${usuarioRegistrado.id} - " +
-            "${usuarioRegistrado.nombre} - " +
-            usuarioRegistrado.rol
-        )
-    }
+    materiaService
+        .listarMaterias(estudianteId)
+        .forEach { materia ->
+
+            println("${materia.id}. ${materia.nombre}")
+            println("   ${materia.descripcion}")
+        }
+
+    println("\nACTUALIZAR MATERIA")
+    println("--------------------------------")
+
+    val actualizada = materiaService.actualizarMateria(
+        id = programacion.id,
+        estudianteId = estudianteId,
+        nuevoNombre = "Programación Orientada a Objetos",
+        nuevaDescripcion = "POO utilizando Kotlin"
+    )
+
+    println(
+        if (actualizada)
+            "Materia actualizada correctamente."
+        else
+            "No se encontró la materia."
+    )
+
+    println("\nELIMINAR MATERIA")
+    println("--------------------------------")
+
+    val eliminada = materiaService.eliminarMateria(
+        id = 2,
+        estudianteId = estudianteId
+    )
+
+    println(
+        if (eliminada)
+            "Materia eliminada correctamente."
+        else
+            "No se encontró la materia."
+    )
+
+    println("\nMATERIAS FINALES")
+    println("--------------------------------")
+
+    materiaService
+        .listarMaterias(estudianteId)
+        .forEach { materia ->
+
+            println("${materia.id}. ${materia.nombre}")
+            println("   ${materia.descripcion}")
+        }
 }
