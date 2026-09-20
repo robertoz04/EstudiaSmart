@@ -1,0 +1,4 @@
+[2026-09-19 21:10:51]
+Tipo: IllegalArgumentException
+Mensaje: El título no puede estar vacío.
+----------------------------------------
