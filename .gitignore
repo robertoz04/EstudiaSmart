@@ -36,3 +36,6 @@ build/
 
 # Configuración local de VS Code
 .vscode/
+# Android Studio
+.idea/
+*.iml
