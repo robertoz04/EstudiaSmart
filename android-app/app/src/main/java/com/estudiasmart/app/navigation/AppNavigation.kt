@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.estudiasmart.app.ui.screens.HomeScreen
 import com.estudiasmart.app.ui.screens.LoginScreen
+import com.estudiasmart.app.ui.screens.MaterialesScreen
 import com.estudiasmart.app.ui.screens.MateriasScreen
 import com.estudiasmart.app.ui.screens.RegisterScreen
 import com.estudiasmart.app.ui.screens.TemasScreen
@@ -101,6 +102,31 @@ fun AppNavigation() {
 
             TemasScreen(
                 materiaId = materiaId,
+                onBack = {
+
+                    navController.popBackStack()
+                },
+                onVerMateriales = { tema ->
+
+                    navController.navigate(
+                        "materiales/${tema.id}"
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = "materiales/{temaId}"
+        ) { backStackEntry ->
+
+            val temaId =
+                backStackEntry.arguments
+                    ?.getString("temaId")
+                    ?.toIntOrNull()
+                    ?: 0
+
+            MaterialesScreen(
+                temaId = temaId,
                 onBack = {
 
                     navController.popBackStack()

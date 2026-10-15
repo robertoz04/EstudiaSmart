@@ -36,7 +36,8 @@ import com.estudiasmart.app.model.Tema
 @Composable
 fun TemasScreen(
     materiaId: Int,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onVerMateriales: (Tema) -> Unit
 ) {
 
     val materia =
@@ -115,7 +116,8 @@ fun TemasScreen(
         )
 
         Text(
-            text = "Organiza los contenidos que estudiarás.",
+            text =
+                "Organiza los contenidos que estudiarás.",
             color = Color.Gray
         )
 
@@ -309,7 +311,9 @@ fun TemasScreen(
 
         val temas =
             AcademicRepository
-                .temasPorMateria(materiaId)
+                .temasPorMateria(
+                    materiaId
+                )
 
         if (temas.isEmpty()) {
 
@@ -379,6 +383,29 @@ fun TemasScreen(
                                     Modifier.height(12.dp)
                             )
 
+                            Button(
+                                onClick = {
+                                    onVerMateriales(
+                                        tema
+                                    )
+                                },
+                                modifier =
+                                    Modifier.fillMaxWidth(),
+                                colors =
+                                    ButtonDefaults.buttonColors(
+                                        containerColor =
+                                            colorPrincipal
+                                    )
+                            ) {
+
+                                Text("VER MATERIALES")
+                            }
+
+                            Spacer(
+                                modifier =
+                                    Modifier.height(8.dp)
+                            )
+
                             Row(
                                 modifier =
                                     Modifier.fillMaxWidth(),
@@ -428,6 +455,7 @@ fun TemasScreen(
 
                                             nombre = ""
                                             descripcion = ""
+                                            error = null
                                         }
                                     },
                                     modifier =

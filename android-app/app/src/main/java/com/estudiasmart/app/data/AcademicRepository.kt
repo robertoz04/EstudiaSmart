@@ -1,6 +1,7 @@
 package com.estudiasmart.app.data
 
 import androidx.compose.runtime.mutableStateListOf
+import com.estudiasmart.app.model.Material
 import com.estudiasmart.app.model.Materia
 import com.estudiasmart.app.model.Tema
 
@@ -18,8 +19,15 @@ object AcademicRepository {
     val temas: List<Tema>
         get() = _temas
 
+    private val _materiales =
+        mutableStateListOf<Material>()
+
+    val materiales: List<Material>
+        get() = _materiales
+
     private var siguienteMateriaId = 1
     private var siguienteTemaId = 1
+    private var siguienteMaterialId = 1
 
     // =========================
     // MATERIAS
@@ -118,19 +126,24 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
-        val eliminada =
-            _materias.removeAll {
-                it.id == id
-            }
-
-        if (eliminada) {
-
-            _temas.removeAll {
+        val temasRelacionados =
+            _temas.filter {
                 it.materiaId == id
+            }.map {
+                it.id
             }
+
+        _materiales.removeAll {
+            it.temaId in temasRelacionados
         }
 
-        return eliminada
+        _temas.removeAll {
+            it.materiaId == id
+        }
+
+        return _materias.removeAll {
+            it.id == id
+        }
     }
 
     fun obtenerMateria(
@@ -152,6 +165,15 @@ object AcademicRepository {
 
         return _temas.filter {
             it.materiaId == materiaId
+        }
+    }
+
+    fun obtenerTema(
+        id: Int
+    ): Tema? {
+
+        return _temas.find {
+            it.id == id
         }
     }
 
@@ -257,7 +279,139 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
+        _materiales.removeAll {
+            it.temaId == id
+        }
+
         return _temas.removeAll {
+            it.id == id
+        }
+    }
+
+    // =========================
+    // MATERIALES
+    // =========================
+
+    fun materialesPorTema(
+        temaId: Int
+    ): List<Material> {
+
+        return _materiales.filter {
+            it.temaId == temaId
+        }
+    }
+
+    fun crearMaterial(
+        temaId: Int,
+        titulo: String,
+        contenido: String
+    ): String? {
+
+        val tituloLimpio = titulo.trim()
+        val contenidoLimpio = contenido.trim()
+
+        if (tituloLimpio.isBlank()) {
+            return "El título del material es obligatorio."
+        }
+
+        if (tituloLimpio.length < 3) {
+            return "El título debe tener al menos 3 caracteres."
+        }
+
+        if (contenidoLimpio.isBlank()) {
+            return "El contenido del material es obligatorio."
+        }
+
+        if (obtenerTema(temaId) == null) {
+            return "El tema no existe."
+        }
+
+        val duplicado =
+            _materiales.any {
+                it.temaId == temaId &&
+                        it.titulo.equals(
+                            tituloLimpio,
+                            ignoreCase = true
+                        )
+            }
+
+        if (duplicado) {
+            return "Ya existe un material con ese título."
+        }
+
+        val material = Material(
+            id = siguienteMaterialId++,
+            temaId = temaId,
+            titulo = tituloLimpio,
+            contenido = contenidoLimpio
+        )
+
+        _materiales.add(material)
+
+        return null
+    }
+
+    fun actualizarMaterial(
+        id: Int,
+        titulo: String,
+        contenido: String
+    ): String? {
+
+        val tituloLimpio = titulo.trim()
+        val contenidoLimpio = contenido.trim()
+
+        if (tituloLimpio.isBlank()) {
+            return "El título del material es obligatorio."
+        }
+
+        if (tituloLimpio.length < 3) {
+            return "El título debe tener al menos 3 caracteres."
+        }
+
+        if (contenidoLimpio.isBlank()) {
+            return "El contenido del material es obligatorio."
+        }
+
+        val indice =
+            _materiales.indexOfFirst {
+                it.id == id
+            }
+
+        if (indice == -1) {
+            return "Material no encontrado."
+        }
+
+        val materialActual =
+            _materiales[indice]
+
+        val duplicado =
+            _materiales.any {
+                it.id != id &&
+                        it.temaId == materialActual.temaId &&
+                        it.titulo.equals(
+                            tituloLimpio,
+                            ignoreCase = true
+                        )
+            }
+
+        if (duplicado) {
+            return "Ya existe otro material con ese título."
+        }
+
+        _materiales[indice] =
+            materialActual.copy(
+                titulo = tituloLimpio,
+                contenido = contenidoLimpio
+            )
+
+        return null
+    }
+
+    fun eliminarMaterial(
+        id: Int
+    ): Boolean {
+
+        return _materiales.removeAll {
             it.id == id
         }
     }
