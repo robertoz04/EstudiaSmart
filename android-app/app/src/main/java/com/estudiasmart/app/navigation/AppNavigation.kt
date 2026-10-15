@@ -6,12 +6,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.estudiasmart.app.ui.screens.HomeScreen
 import com.estudiasmart.app.ui.screens.LoginScreen
-import com.estudiasmart.app.ui.screens.RegisterScreen
 import com.estudiasmart.app.ui.screens.MateriasScreen
+import com.estudiasmart.app.ui.screens.RegisterScreen
+import com.estudiasmart.app.ui.screens.TemasScreen
+
 @Composable
 fun AppNavigation() {
 
-    val navController = rememberNavController()
+    val navController =
+        rememberNavController()
 
     NavHost(
         navController = navController,
@@ -22,14 +25,19 @@ fun AppNavigation() {
 
             LoginScreen(
                 onLoginSuccess = {
+
                     navController.navigate("home") {
+
                         popUpTo("login") {
                             inclusive = true
                         }
                     }
                 },
                 onRegisterClick = {
-                    navController.navigate("register")
+
+                    navController.navigate(
+                        "register"
+                    )
                 }
             )
         }
@@ -38,13 +46,16 @@ fun AppNavigation() {
 
             RegisterScreen(
                 onRegisterSuccess = {
+
                     navController.navigate("home") {
+
                         popUpTo("register") {
                             inclusive = true
                         }
                     }
                 },
                 onBackToLogin = {
+
                     navController.popBackStack()
                 }
             )
@@ -54,7 +65,10 @@ fun AppNavigation() {
 
             HomeScreen(
                 onMateriasClick = {
-                    navController.navigate("materias")
+
+                    navController.navigate(
+                        "materias"
+                    )
                 }
             )
         }
@@ -63,6 +77,32 @@ fun AppNavigation() {
 
             MateriasScreen(
                 onBack = {
+
+                    navController.popBackStack()
+                },
+                onVerTemas = { materia ->
+
+                    navController.navigate(
+                        "temas/${materia.id}"
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = "temas/{materiaId}"
+        ) { backStackEntry ->
+
+            val materiaId =
+                backStackEntry.arguments
+                    ?.getString("materiaId")
+                    ?.toIntOrNull()
+                    ?: 0
+
+            TemasScreen(
+                materiaId = materiaId,
+                onBack = {
+
                     navController.popBackStack()
                 }
             )

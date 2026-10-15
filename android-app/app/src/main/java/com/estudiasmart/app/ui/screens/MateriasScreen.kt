@@ -35,7 +35,8 @@ import com.estudiasmart.app.model.Materia
 
 @Composable
 fun MateriasScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onVerTemas: (Materia) -> Unit
 ) {
 
     var nombre by remember {
@@ -131,8 +132,7 @@ fun MateriasScreen(
                         Text("Ej. Programación III")
                     },
                     singleLine = true,
-                    modifier =
-                        Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(
@@ -150,8 +150,7 @@ fun MateriasScreen(
                     placeholder = {
                         Text("Descripción de la materia")
                     },
-                    modifier =
-                        Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 if (error != null) {
@@ -178,8 +177,8 @@ fun MateriasScreen(
                             val resultado =
                                 AcademicRepository
                                     .crearMateria(
-                                        nombre,
-                                        descripcion
+                                        nombre = nombre,
+                                        descripcion = descripcion
                                     )
 
                             if (resultado == null) {
@@ -198,9 +197,9 @@ fun MateriasScreen(
                             val resultado =
                                 AcademicRepository
                                     .actualizarMateria(
-                                        materiaEditando!!.id,
-                                        nombre,
-                                        descripcion
+                                        id = materiaEditando!!.id,
+                                        nombre = nombre,
+                                        descripcion = descripcion
                                     )
 
                             if (resultado == null) {
@@ -216,20 +215,18 @@ fun MateriasScreen(
                             }
                         }
                     },
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                colorPrincipal
-                        )
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorPrincipal
+                    )
                 ) {
 
                     Text(
-                        if (materiaEditando == null)
-                            "AGREGAR MATERIA"
-                        else
-                            "GUARDAR CAMBIOS"
+                        text =
+                            if (materiaEditando == null)
+                                "AGREGAR MATERIA"
+                            else
+                                "GUARDAR CAMBIOS"
                     )
                 }
 
@@ -243,8 +240,7 @@ fun MateriasScreen(
                             descripcion = ""
                             error = null
                         },
-                        modifier =
-                            Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     ) {
 
                         Text("Cancelar edición")
@@ -267,13 +263,10 @@ fun MateriasScreen(
             modifier = Modifier.height(10.dp)
         )
 
-        if (
-            AcademicRepository.materias.isEmpty()
-        ) {
+        if (AcademicRepository.materias.isEmpty()) {
 
             Text(
-                text =
-                    "Todavía no tienes materias registradas.",
+                text = "Todavía no tienes materias registradas.",
                 color = Color.Gray
             )
 
@@ -285,35 +278,28 @@ fun MateriasScreen(
             ) {
 
                 items(
-                    items =
-                        AcademicRepository.materias,
+                    items = AcademicRepository.materias,
                     key = {
                         it.id
                     }
                 ) { materia ->
 
                     Card(
-                        modifier =
-                            Modifier.fillMaxWidth(),
-                        shape =
-                            RoundedCornerShape(16.dp),
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor =
-                                    Color.White
-                            )
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
                     ) {
 
                         Column(
-                            modifier =
-                                Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp)
                         ) {
 
                             Text(
                                 text = materia.nombre,
                                 fontSize = 18.sp,
-                                fontWeight =
-                                    FontWeight.Bold
+                                fontWeight = FontWeight.Bold
                             )
 
                             if (
@@ -327,8 +313,7 @@ fun MateriasScreen(
                                 )
 
                                 Text(
-                                    text =
-                                        materia.descripcion,
+                                    text = materia.descripcion,
                                     color = Color.Gray
                                 )
                             }
@@ -338,13 +323,32 @@ fun MateriasScreen(
                                     Modifier.height(12.dp)
                             )
 
+                            Button(
+                                onClick = {
+                                    onVerTemas(materia)
+                                },
+                                modifier =
+                                    Modifier.fillMaxWidth(),
+                                colors =
+                                    ButtonDefaults.buttonColors(
+                                        containerColor =
+                                            colorPrincipal
+                                    )
+                            ) {
+
+                                Text("VER TEMAS")
+                            }
+
+                            Spacer(
+                                modifier =
+                                    Modifier.height(8.dp)
+                            )
+
                             Row(
                                 modifier =
                                     Modifier.fillMaxWidth(),
                                 horizontalArrangement =
-                                    Arrangement.spacedBy(
-                                        8.dp
-                                    )
+                                    Arrangement.spacedBy(8.dp)
                             ) {
 
                                 OutlinedButton(
@@ -387,6 +391,7 @@ fun MateriasScreen(
 
                                             nombre = ""
                                             descripcion = ""
+                                            error = null
                                         }
                                     },
                                     modifier =
