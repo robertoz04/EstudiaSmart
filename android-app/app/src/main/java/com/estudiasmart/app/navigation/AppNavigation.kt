@@ -7,7 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.estudiasmart.app.ui.screens.HomeScreen
 import com.estudiasmart.app.ui.screens.LoginScreen
 import com.estudiasmart.app.ui.screens.RegisterScreen
-
+import com.estudiasmart.app.ui.screens.MateriasScreen
 @Composable
 fun AppNavigation() {
 
@@ -51,7 +51,21 @@ fun AppNavigation() {
         }
 
         composable("home") {
-            HomeScreen()
+
+            HomeScreen(
+                onMateriasClick = {
+                    navController.navigate("materias")
+                }
+            )
+        }
+
+        composable("materias") {
+
+            MateriasScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
