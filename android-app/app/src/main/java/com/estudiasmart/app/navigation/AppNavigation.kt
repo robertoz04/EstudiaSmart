@@ -9,6 +9,7 @@ import com.estudiasmart.app.ui.screens.HomeScreen
 import com.estudiasmart.app.ui.screens.LoginScreen
 import com.estudiasmart.app.ui.screens.MaterialesScreen
 import com.estudiasmart.app.ui.screens.MateriasScreen
+import com.estudiasmart.app.ui.screens.QuizScreen
 import com.estudiasmart.app.ui.screens.RegisterScreen
 import com.estudiasmart.app.ui.screens.TemasScreen
 
@@ -31,7 +32,9 @@ fun AppNavigation() {
                 onLoginSuccess = {
 
                     navController
-                        .navigate("home") {
+                        .navigate(
+                            "home"
+                        ) {
 
                             popUpTo(
                                 "login"
@@ -57,7 +60,9 @@ fun AppNavigation() {
                 onRegisterSuccess = {
 
                     navController
-                        .navigate("home") {
+                        .navigate(
+                            "home"
+                        ) {
 
                             popUpTo(
                                 "register"
@@ -91,6 +96,13 @@ fun AppNavigation() {
                         .navigate(
                             "flashcards"
                         )
+                },
+                onQuizClick = {
+
+                    navController
+                        .navigate(
+                            "quiz"
+                        )
                 }
             )
         }
@@ -108,7 +120,22 @@ fun AppNavigation() {
             )
         }
 
-        composable("materias") {
+        composable(
+            "quiz"
+        ) {
+
+            QuizScreen(
+                onBack = {
+
+                    navController
+                        .popBackStack()
+                }
+            )
+        }
+
+        composable(
+            "materias"
+        ) {
 
             MateriasScreen(
                 onBack = {

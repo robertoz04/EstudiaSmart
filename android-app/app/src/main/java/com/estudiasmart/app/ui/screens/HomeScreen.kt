@@ -24,11 +24,13 @@ import androidx.compose.ui.unit.sp
 import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.data.AuthRepository
 import com.estudiasmart.app.data.FlashcardRepository
+import com.estudiasmart.app.data.QuizRepository
 
 @Composable
 fun HomeScreen(
     onMateriasClick: () -> Unit,
-    onFlashcardsClick: () -> Unit
+    onFlashcardsClick: () -> Unit,
+    onQuizClick: () -> Unit
 ) {
 
     val colorPrincipal =
@@ -77,7 +79,8 @@ fun HomeScreen(
         Text(
             text =
                 "¿Qué quieres estudiar hoy?",
-            color = Color.Gray
+            color =
+                Color.Gray
         )
 
         Spacer(
@@ -130,20 +133,20 @@ fun HomeScreen(
         ) {
 
             ResumenCard(
-                titulo = "Materiales",
+                titulo = "Flashcards",
                 valor =
-                    AcademicRepository
-                        .materiales.size
+                    FlashcardRepository
+                        .flashcards.size
                         .toString(),
                 modifier =
                     Modifier.weight(1f)
             )
 
             ResumenCard(
-                titulo = "Flashcards",
+                titulo = "Quiz",
                 valor =
-                    FlashcardRepository
-                        .flashcards.size
+                    QuizRepository
+                        .quizzes.size
                         .toString(),
                 modifier =
                     Modifier.weight(1f)
@@ -168,192 +171,124 @@ fun HomeScreen(
                 Modifier.height(14.dp)
         )
 
-        Card(
-            modifier =
-                Modifier.fillMaxWidth(),
-            shape =
-                RoundedCornerShape(20.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        Color.White
-                ),
-            elevation =
-                CardDefaults.cardElevation(
-                    defaultElevation =
-                        3.dp
-                )
-        ) {
-
-            Column(
-                modifier =
-                    Modifier.padding(20.dp)
-            ) {
-
-                Text(
-                    text = "📚 Mis materias",
-                    fontSize = 19.sp,
-                    fontWeight =
-                        FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(6.dp)
-                )
-
-                Text(
-                    text =
-                        "Administra tus materias, temas y materiales de estudio.",
-                    color =
-                        Color.Gray
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(14.dp)
-                )
-
-                Button(
-                    onClick =
-                        onMateriasClick,
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    colors =
-                        ButtonDefaults
-                            .buttonColors(
-                                containerColor =
-                                    colorPrincipal
-                            ),
-                    shape =
-                        RoundedCornerShape(
-                            12.dp
-                        )
-                ) {
-
-                    Text(
-                        "ABRIR MIS MATERIAS"
-                    )
-                }
-            }
-        }
-
-        Spacer(
-            modifier =
-                Modifier.height(14.dp)
+        ToolCard(
+            titulo =
+                "📚 Mis materias",
+            descripcion =
+                "Administra tus materias, temas y materiales.",
+            boton =
+                "ABRIR MIS MATERIAS",
+            onClick =
+                onMateriasClick
         )
-
-        Card(
-            modifier =
-                Modifier.fillMaxWidth(),
-            shape =
-                RoundedCornerShape(20.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        Color.White
-                )
-        ) {
-
-            Column(
-                modifier =
-                    Modifier.padding(20.dp)
-            ) {
-
-                Text(
-                    text = "🧠 Flashcards",
-                    fontSize = 18.sp,
-                    fontWeight =
-                        FontWeight.Bold
-                )
-
-                Text(
-                    text =
-                        "Repasa conceptos con repetición espaciada.",
-                    color =
-                        Color.Gray
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(12.dp)
-                )
-
-                Button(
-                    onClick =
-                        onFlashcardsClick,
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    colors =
-                        ButtonDefaults
-                            .buttonColors(
-                                containerColor =
-                                    colorPrincipal
-                            )
-                ) {
-
-                    Text(
-                        "ABRIR FLASHCARDS"
-                    )
-                }
-            }
-        }
 
         Spacer(
             modifier =
                 Modifier.height(12.dp)
         )
 
-        Card(
+        ToolCard(
+            titulo =
+                "🧠 Flashcards",
+            descripcion =
+                "Repasa conceptos con repetición espaciada.",
+            boton =
+                "ABRIR FLASHCARDS",
+            onClick =
+                onFlashcardsClick
+        )
+
+        Spacer(
             modifier =
-                Modifier.fillMaxWidth(),
-            shape =
-                RoundedCornerShape(20.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        Color.White
-                )
-        ) {
+                Modifier.height(12.dp)
+        )
 
-            Column(
-                modifier =
-                    Modifier.padding(20.dp)
-            ) {
-
-                Text(
-                    text = "📝 Quiz",
-                    fontSize = 18.sp,
-                    fontWeight =
-                        FontWeight.Bold
-                )
-
-                Text(
-                    text =
-                        "Evalúa tus conocimientos y revisa tus resultados.",
-                    color =
-                        Color.Gray
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
-
-                Text(
-                    text = "Próximamente",
-                    color =
-                        colorPrincipal,
-                    fontWeight =
-                        FontWeight.Medium
-                )
-            }
-        }
+        ToolCard(
+            titulo =
+                "📝 Quiz",
+            descripcion =
+                "Evalúa tus conocimientos y revisa tus resultados.",
+            boton =
+                "ABRIR QUIZ",
+            onClick =
+                onQuizClick
+        )
 
         Spacer(
             modifier =
                 Modifier.height(20.dp)
         )
+    }
+}
+
+@Composable
+private fun ToolCard(
+    titulo: String,
+    descripcion: String,
+    boton: String,
+    onClick: () -> Unit
+) {
+
+    Card(
+        modifier =
+            Modifier.fillMaxWidth(),
+        shape =
+            RoundedCornerShape(
+                20.dp
+            ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    Color.White
+            )
+    ) {
+
+        Column(
+            modifier =
+                Modifier.padding(
+                    20.dp
+                )
+        ) {
+
+            Text(
+                text = titulo,
+                fontSize =
+                    18.sp,
+                fontWeight =
+                    FontWeight.Bold
+            )
+
+            Text(
+                text =
+                    descripcion,
+                color =
+                    Color.Gray
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(
+                        12.dp
+                    )
+            )
+
+            Button(
+                onClick =
+                    onClick,
+                modifier =
+                    Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor =
+                            Color(0xFF4F46E5)
+                    )
+            ) {
+
+                Text(
+                    boton
+                )
+            }
+        }
     }
 }
 
@@ -366,9 +301,12 @@ private fun ResumenCard(
 ) {
 
     Card(
-        modifier = modifier,
+        modifier =
+            modifier,
         shape =
-            RoundedCornerShape(18.dp),
+            RoundedCornerShape(
+                18.dp
+            ),
         colors =
             CardDefaults.cardColors(
                 containerColor =
@@ -383,12 +321,16 @@ private fun ResumenCard(
 
         Column(
             modifier =
-                Modifier.padding(16.dp)
+                Modifier.padding(
+                    16.dp
+                )
         ) {
 
             Text(
-                text = valor,
-                fontSize = 26.sp,
+                text =
+                    valor,
+                fontSize =
+                    26.sp,
                 fontWeight =
                     FontWeight.Bold,
                 color =
@@ -396,8 +338,10 @@ private fun ResumenCard(
             )
 
             Text(
-                text = titulo,
-                fontSize = 14.sp,
+                text =
+                    titulo,
+                fontSize =
+                    14.sp,
                 color =
                     Color.Gray
             )
