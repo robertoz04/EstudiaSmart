@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.data.QuizRepository
 import com.estudiasmart.app.model.Quiz
+import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
 import java.util.Locale
 
 @Composable
@@ -45,10 +46,14 @@ fun QuizScreen(
     onBack: () -> Unit
 ) {
 
-    val temas = AcademicRepository.temas
+    val temas =
+        AcademicRepository.temas
 
-    val colorPrincipal = Color(0xFF4F46E5)
-    val fondo = Color(0xFFF6F7FB)
+    val colorPrincipal =
+        Color(0xFF4F46E5)
+
+    val fondo =
+        Color(0xFFF6F7FB)
 
     var tituloQuiz by remember {
         mutableStateOf("")
@@ -74,6 +79,10 @@ fun QuizScreen(
 
     var quizResolviendoId by remember {
         mutableStateOf<Int?>(null)
+    }
+
+    var quizAEliminar by remember {
+        mutableStateOf<Quiz?>(null)
     }
 
     var enunciado by remember {
@@ -138,8 +147,7 @@ fun QuizScreen(
         item {
 
             Spacer(
-                modifier =
-                    Modifier.height(12.dp)
+                modifier = Modifier.height(12.dp)
             )
 
             TextButton(
@@ -151,22 +159,18 @@ fun QuizScreen(
             Text(
                 text = "Quiz",
                 fontSize = 30.sp,
-                fontWeight =
-                    FontWeight.Bold,
-                color =
-                    colorPrincipal
+                fontWeight = FontWeight.Bold,
+                color = colorPrincipal
             )
 
             Text(
                 text =
                     "Evalúa tus conocimientos y revisa tu progreso.",
-                color =
-                    Color.Gray
+                color = Color.Gray
             )
 
             Spacer(
-                modifier =
-                    Modifier.height(16.dp)
+                modifier = Modifier.height(16.dp)
             )
         }
 
@@ -186,16 +190,13 @@ fun QuizScreen(
 
                     Column(
                         modifier =
-                            Modifier.padding(
-                                20.dp
-                            )
+                            Modifier.padding(20.dp)
                     ) {
 
                         Text(
                             text =
                                 "Primero debes crear una materia y al menos un tema.",
-                            color =
-                                Color.Gray
+                            color = Color.Gray
                         )
                     }
                 }
@@ -209,9 +210,7 @@ fun QuizScreen(
                     modifier =
                         Modifier.fillMaxWidth(),
                     shape =
-                        RoundedCornerShape(
-                            20.dp
-                        ),
+                        RoundedCornerShape(20.dp),
                     colors =
                         CardDefaults.cardColors(
                             containerColor =
@@ -226,9 +225,7 @@ fun QuizScreen(
 
                     Column(
                         modifier =
-                            Modifier.padding(
-                                20.dp
-                            )
+                            Modifier.padding(20.dp)
                     ) {
 
                         Text(
@@ -240,9 +237,7 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    14.dp
-                                )
+                                Modifier.height(14.dp)
                         )
 
                         Text(
@@ -253,9 +248,7 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    6.dp
-                                )
+                                Modifier.height(6.dp)
                         )
 
                         Box(
@@ -294,8 +287,7 @@ fun QuizScreen(
                                 }
                             ) {
 
-                                temas.forEach {
-                                        tema ->
+                                temas.forEach { tema ->
 
                                     DropdownMenuItem(
                                         text = {
@@ -321,9 +313,7 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    12.dp
-                                )
+                                Modifier.height(12.dp)
                         )
 
                         OutlinedTextField(
@@ -348,20 +338,15 @@ fun QuizScreen(
                                 Modifier.fillMaxWidth()
                         )
 
-                        if (
-                            errorQuiz != null
-                        ) {
+                        if (errorQuiz != null) {
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        8.dp
-                                    )
+                                    Modifier.height(8.dp)
                             )
 
                             Text(
-                                text =
-                                    errorQuiz!!,
+                                text = errorQuiz!!,
                                 color =
                                     MaterialTheme
                                         .colorScheme
@@ -371,9 +356,7 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    14.dp
-                                )
+                                Modifier.height(14.dp)
                         )
 
                         Button(
@@ -382,9 +365,7 @@ fun QuizScreen(
                                 val temaId =
                                     temaSeleccionadoId
 
-                                if (
-                                    temaId == null
-                                ) {
+                                if (temaId == null) {
 
                                     errorQuiz =
                                         "Selecciona un tema."
@@ -401,16 +382,10 @@ fun QuizScreen(
                                                 tituloQuiz
                                         )
 
-                                if (
-                                    resultado ==
-                                    null
-                                ) {
+                                if (resultado == null) {
 
-                                    tituloQuiz =
-                                        ""
-
-                                    errorQuiz =
-                                        null
+                                    tituloQuiz = ""
+                                    errorQuiz = null
 
                                 } else {
 
@@ -428,9 +403,7 @@ fun QuizScreen(
                                     )
                         ) {
 
-                            Text(
-                                "CREAR QUIZ"
-                            )
+                            Text("CREAR QUIZ")
                         }
                     }
                 }
@@ -449,8 +422,7 @@ fun QuizScreen(
                 Text(
                     text =
                         "${QuizRepository.quizzes.size} quizzes en total",
-                    color =
-                        Color.Gray
+                    color = Color.Gray
                 )
             }
 
@@ -465,8 +437,7 @@ fun QuizScreen(
                     Text(
                         text =
                             "Todavía no tienes quizzes.",
-                        color =
-                            Color.Gray
+                        color = Color.Gray
                     )
                 }
 
@@ -474,8 +445,7 @@ fun QuizScreen(
 
                 items(
                     items =
-                        QuizRepository
-                            .quizzes,
+                        QuizRepository.quizzes,
                     key = {
                         it.id
                     }
@@ -483,6 +453,7 @@ fun QuizScreen(
 
                     QuizCard(
                         quiz = quiz,
+
                         onAdministrar = {
 
                             quizAdministrandoId =
@@ -497,6 +468,7 @@ fun QuizScreen(
                             respuestasUsuario =
                                 emptyMap()
                         },
+
                         onResolver = {
 
                             quizResolviendoId =
@@ -511,28 +483,11 @@ fun QuizScreen(
                             resultadoTexto =
                                 null
                         },
+
                         onEliminar = {
 
-                            QuizRepository
-                                .eliminarQuiz(
-                                    quiz.id
-                                )
-
-                            if (
-                                quizAdministrandoId ==
-                                quiz.id
-                            ) {
-                                quizAdministrandoId =
-                                    null
-                            }
-
-                            if (
-                                quizResolviendoId ==
-                                quiz.id
-                            ) {
-                                quizResolviendoId =
-                                    null
-                            }
+                            quizAEliminar =
+                                quiz
                         }
                     )
                 }
@@ -548,9 +503,7 @@ fun QuizScreen(
                         modifier =
                             Modifier.fillMaxWidth(),
                         shape =
-                            RoundedCornerShape(
-                                20.dp
-                            ),
+                            RoundedCornerShape(20.dp),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
@@ -560,16 +513,13 @@ fun QuizScreen(
 
                         Column(
                             modifier =
-                                Modifier.padding(
-                                    20.dp
-                                )
+                                Modifier.padding(20.dp)
                         ) {
 
                             Text(
                                 text =
                                     "Administrar Quiz",
-                                fontSize =
-                                    20.sp,
+                                fontSize = 20.sp,
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -584,24 +534,19 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        14.dp
-                                    )
+                                    Modifier.height(14.dp)
                             )
 
                             OutlinedTextField(
                                 value =
                                     enunciado,
                                 onValueChange = {
-                                    enunciado =
-                                        it
+                                    enunciado = it
                                     errorPregunta =
                                         null
                                 },
                                 label = {
-                                    Text(
-                                        "Pregunta"
-                                    )
+                                    Text("Pregunta")
                                 },
                                 placeholder = {
                                     Text(
@@ -614,21 +559,16 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        8.dp
-                                    )
+                                    Modifier.height(8.dp)
                             )
 
                             OutlinedTextField(
-                                value =
-                                    opcion1,
+                                value = opcion1,
                                 onValueChange = {
                                     opcion1 = it
                                 },
                                 label = {
-                                    Text(
-                                        "Opción A"
-                                    )
+                                    Text("Opción A")
                                 },
                                 singleLine = true,
                                 modifier =
@@ -636,15 +576,12 @@ fun QuizScreen(
                             )
 
                             OutlinedTextField(
-                                value =
-                                    opcion2,
+                                value = opcion2,
                                 onValueChange = {
                                     opcion2 = it
                                 },
                                 label = {
-                                    Text(
-                                        "Opción B"
-                                    )
+                                    Text("Opción B")
                                 },
                                 singleLine = true,
                                 modifier =
@@ -652,15 +589,12 @@ fun QuizScreen(
                             )
 
                             OutlinedTextField(
-                                value =
-                                    opcion3,
+                                value = opcion3,
                                 onValueChange = {
                                     opcion3 = it
                                 },
                                 label = {
-                                    Text(
-                                        "Opción C"
-                                    )
+                                    Text("Opción C")
                                 },
                                 singleLine = true,
                                 modifier =
@@ -668,15 +602,12 @@ fun QuizScreen(
                             )
 
                             OutlinedTextField(
-                                value =
-                                    opcion4,
+                                value = opcion4,
                                 onValueChange = {
                                     opcion4 = it
                                 },
                                 label = {
-                                    Text(
-                                        "Opción D"
-                                    )
+                                    Text("Opción D")
                                 },
                                 singleLine = true,
                                 modifier =
@@ -685,9 +616,7 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        12.dp
-                                    )
+                                    Modifier.height(12.dp)
                             )
 
                             Text(
@@ -698,8 +627,7 @@ fun QuizScreen(
                             )
 
                             OpcionCorrecta(
-                                texto =
-                                    "A",
+                                texto = "A",
                                 indice = 0,
                                 seleccion =
                                     respuestaCorrecta,
@@ -710,8 +638,7 @@ fun QuizScreen(
                             )
 
                             OpcionCorrecta(
-                                texto =
-                                    "B",
+                                texto = "B",
                                 indice = 1,
                                 seleccion =
                                     respuestaCorrecta,
@@ -722,8 +649,7 @@ fun QuizScreen(
                             )
 
                             OpcionCorrecta(
-                                texto =
-                                    "C",
+                                texto = "C",
                                 indice = 2,
                                 seleccion =
                                     respuestaCorrecta,
@@ -734,8 +660,7 @@ fun QuizScreen(
                             )
 
                             OpcionCorrecta(
-                                texto =
-                                    "D",
+                                texto = "D",
                                 indice = 3,
                                 seleccion =
                                     respuestaCorrecta,
@@ -761,9 +686,7 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        12.dp
-                                    )
+                                    Modifier.height(12.dp)
                             )
 
                             Button(
@@ -772,10 +695,7 @@ fun QuizScreen(
                                     val correcta =
                                         respuestaCorrecta
 
-                                    if (
-                                        correcta ==
-                                        null
-                                    ) {
+                                    if (correcta == null) {
 
                                         errorPregunta =
                                             "Selecciona la respuesta correcta."
@@ -803,25 +723,13 @@ fun QuizScreen(
                                                     correcta
                                             )
 
-                                    if (
-                                        resultado ==
-                                        null
-                                    ) {
+                                    if (resultado == null) {
 
-                                        enunciado =
-                                            ""
-
-                                        opcion1 =
-                                            ""
-
-                                        opcion2 =
-                                            ""
-
-                                        opcion3 =
-                                            ""
-
-                                        opcion4 =
-                                            ""
+                                        enunciado = ""
+                                        opcion1 = ""
+                                        opcion2 = ""
+                                        opcion3 = ""
+                                        opcion4 = ""
 
                                         respuestaCorrecta =
                                             null
@@ -852,9 +760,7 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        18.dp
-                                    )
+                                    Modifier.height(18.dp)
                             )
 
                             Text(
@@ -866,15 +772,12 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        8.dp
-                                    )
+                                    Modifier.height(8.dp)
                             )
 
                             quizAdministrando
                                 .preguntas
-                                .forEach {
-                                        pregunta ->
+                                .forEach { pregunta ->
 
                                     Card(
                                         modifier =
@@ -931,8 +834,7 @@ fun QuizScreen(
                                                                 quizAdministrando
                                                                     .id,
                                                             preguntaId =
-                                                                pregunta
-                                                                    .id
+                                                                pregunta.id
                                                         )
                                                 }
                                             ) {
@@ -959,9 +861,7 @@ fun QuizScreen(
                         modifier =
                             Modifier.fillMaxWidth(),
                         shape =
-                            RoundedCornerShape(
-                                20.dp
-                            ),
+                            RoundedCornerShape(20.dp),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
@@ -971,16 +871,13 @@ fun QuizScreen(
 
                         Column(
                             modifier =
-                                Modifier.padding(
-                                    20.dp
-                                )
+                                Modifier.padding(20.dp)
                         ) {
 
                             Text(
                                 text =
                                     "Resolver Quiz",
-                                fontSize =
-                                    20.sp,
+                                fontSize = 20.sp,
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -995,9 +892,7 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(
-                                        16.dp
-                                    )
+                                    Modifier.height(16.dp)
                             )
 
                             if (
@@ -1070,9 +965,7 @@ fun QuizScreen(
 
                                         Spacer(
                                             modifier =
-                                                Modifier.height(
-                                                    12.dp
-                                                )
+                                                Modifier.height(12.dp)
                                         )
                                     }
 
@@ -1103,10 +996,7 @@ fun QuizScreen(
                                                         respuestasUsuario
                                                 )
 
-                                        if (
-                                            intento !=
-                                            null
-                                        ) {
+                                        if (intento != null) {
 
                                             resultadoTexto =
                                                 "Resultado: ${
@@ -1134,22 +1024,18 @@ fun QuizScreen(
                                 }
 
                                 if (
-                                    resultadoTexto !=
-                                    null
+                                    resultadoTexto != null
                                 ) {
 
                                     Spacer(
                                         modifier =
-                                            Modifier.height(
-                                                12.dp
-                                            )
+                                            Modifier.height(12.dp)
                                     )
 
                                     Text(
                                         text =
                                             resultadoTexto!!,
-                                        fontSize =
-                                            18.sp,
+                                        fontSize = 18.sp,
                                         fontWeight =
                                             FontWeight.Bold,
                                         color =
@@ -1176,12 +1062,62 @@ fun QuizScreen(
 
                 Spacer(
                     modifier =
-                        Modifier.height(
-                            30.dp
-                        )
+                        Modifier.height(30.dp)
                 )
             }
         }
+    }
+
+    if (quizAEliminar != null) {
+
+        ConfirmDeleteDialog(
+            titulo =
+                "Eliminar Quiz",
+            mensaje =
+                "¿Seguro que deseas eliminar \"${quizAEliminar!!.titulo}\"? También se eliminarán sus preguntas e intentos registrados.",
+            onConfirm = {
+
+                val id =
+                    quizAEliminar!!.id
+
+                QuizRepository
+                    .eliminarQuiz(
+                        id
+                    )
+
+                if (
+                    quizAdministrandoId ==
+                    id
+                ) {
+
+                    quizAdministrandoId =
+                        null
+                }
+
+                if (
+                    quizResolviendoId ==
+                    id
+                ) {
+
+                    quizResolviendoId =
+                        null
+                }
+
+                respuestasUsuario =
+                    emptyMap()
+
+                resultadoTexto =
+                    null
+
+                quizAEliminar =
+                    null
+            },
+            onDismiss = {
+
+                quizAEliminar =
+                    null
+            }
+        )
     }
 }
 
@@ -1240,9 +1176,7 @@ private fun QuizCard(
         modifier =
             Modifier.fillMaxWidth(),
         shape =
-            RoundedCornerShape(
-                18.dp
-            ),
+            RoundedCornerShape(18.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor =
@@ -1252,9 +1186,7 @@ private fun QuizCard(
 
         Column(
             modifier =
-                Modifier.padding(
-                    16.dp
-                )
+                Modifier.padding(16.dp)
         ) {
 
             Text(
@@ -1269,25 +1201,19 @@ private fun QuizCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(
-                        4.dp
-                    )
+                    Modifier.height(4.dp)
             )
 
             Text(
-                text =
-                    quiz.titulo,
-                fontSize =
-                    18.sp,
+                text = quiz.titulo,
+                fontSize = 18.sp,
                 fontWeight =
                     FontWeight.Bold
             )
 
             Spacer(
                 modifier =
-                    Modifier.height(
-                        6.dp
-                    )
+                    Modifier.height(6.dp)
             )
 
             Text(
@@ -1297,9 +1223,7 @@ private fun QuizCard(
                     Color.Gray
             )
 
-            if (
-                mejorNota != null
-            ) {
+            if (mejorNota != null) {
 
                 Text(
                     text =
@@ -1317,9 +1241,7 @@ private fun QuizCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(
-                        12.dp
-                    )
+                    Modifier.height(12.dp)
             )
 
             Button(
@@ -1341,9 +1263,7 @@ private fun QuizCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(
-                        8.dp
-                    )
+                    Modifier.height(8.dp)
             )
 
             OutlinedButton(

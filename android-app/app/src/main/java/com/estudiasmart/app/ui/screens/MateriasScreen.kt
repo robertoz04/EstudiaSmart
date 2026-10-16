@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.model.Materia
+import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
 
 @Composable
 fun MateriasScreen(
@@ -52,6 +53,10 @@ fun MateriasScreen(
     }
 
     var materiaEditando by remember {
+        mutableStateOf<Materia?>(null)
+    }
+
+    var materiaAEliminar by remember {
         mutableStateOf<Materia?>(null)
     }
 
@@ -82,7 +87,8 @@ fun MateriasScreen(
         )
 
         Text(
-            text = "Organiza las materias que estás estudiando.",
+            text =
+                "Organiza las materias que estás estudiando.",
             color = Color.Gray
         )
 
@@ -93,30 +99,39 @@ fun MateriasScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 3.dp
-            )
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        Color.White
+                ),
+            elevation =
+                CardDefaults.cardElevation(
+                    defaultElevation = 3.dp
+                )
         ) {
 
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier =
+                    Modifier.padding(20.dp)
             ) {
 
                 Text(
                     text =
-                        if (materiaEditando == null)
+                        if (
+                            materiaEditando ==
+                            null
+                        )
                             "Nueva materia"
                         else
                             "Editar materia",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight =
+                        FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier =
+                        Modifier.height(12.dp)
                 )
 
                 OutlinedTextField(
@@ -129,14 +144,18 @@ fun MateriasScreen(
                         Text("Nombre")
                     },
                     placeholder = {
-                        Text("Ej. Programación III")
+                        Text(
+                            "Ej. Programación III"
+                        )
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 Spacer(
-                    modifier = Modifier.height(10.dp)
+                    modifier =
+                        Modifier.height(10.dp)
                 )
 
                 OutlinedTextField(
@@ -148,40 +167,54 @@ fun MateriasScreen(
                         Text("Descripción")
                     },
                     placeholder = {
-                        Text("Descripción de la materia")
+                        Text(
+                            "Descripción de la materia"
+                        )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 if (error != null) {
 
                     Spacer(
-                        modifier = Modifier.height(8.dp)
+                        modifier =
+                            Modifier.height(8.dp)
                     )
 
                     Text(
                         text = error!!,
-                        color = Color(0xFFB3261E)
+                        color =
+                            Color(0xFFB3261E)
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier =
+                        Modifier.height(16.dp)
                 )
 
                 Button(
                     onClick = {
 
-                        if (materiaEditando == null) {
+                        if (
+                            materiaEditando ==
+                            null
+                        ) {
 
                             val resultado =
                                 AcademicRepository
                                     .crearMateria(
-                                        nombre = nombre,
-                                        descripcion = descripcion
+                                        nombre =
+                                            nombre,
+                                        descripcion =
+                                            descripcion
                                     )
 
-                            if (resultado == null) {
+                            if (
+                                resultado ==
+                                null
+                            ) {
 
                                 nombre = ""
                                 descripcion = ""
@@ -189,7 +222,8 @@ fun MateriasScreen(
 
                             } else {
 
-                                error = resultado
+                                error =
+                                    resultado
                             }
 
                         } else {
@@ -197,109 +231,160 @@ fun MateriasScreen(
                             val resultado =
                                 AcademicRepository
                                     .actualizarMateria(
-                                        id = materiaEditando!!.id,
-                                        nombre = nombre,
-                                        descripcion = descripcion
+                                        id =
+                                            materiaEditando!!
+                                                .id,
+                                        nombre =
+                                            nombre,
+                                        descripcion =
+                                            descripcion
                                     )
 
-                            if (resultado == null) {
+                            if (
+                                resultado ==
+                                null
+                            ) {
 
                                 nombre = ""
                                 descripcion = ""
-                                materiaEditando = null
+                                materiaEditando =
+                                    null
                                 error = null
 
                             } else {
 
-                                error = resultado
+                                error =
+                                    resultado
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorPrincipal
-                    )
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    colorPrincipal
+                            )
                 ) {
 
                     Text(
                         text =
-                            if (materiaEditando == null)
+                            if (
+                                materiaEditando ==
+                                null
+                            )
                                 "AGREGAR MATERIA"
                             else
                                 "GUARDAR CAMBIOS"
                     )
                 }
 
-                if (materiaEditando != null) {
+                if (
+                    materiaEditando !=
+                    null
+                ) {
 
                     TextButton(
                         onClick = {
 
-                            materiaEditando = null
+                            materiaEditando =
+                                null
+
                             nombre = ""
                             descripcion = ""
                             error = null
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier =
+                            Modifier.fillMaxWidth()
                     ) {
 
-                        Text("Cancelar edición")
+                        Text(
+                            "Cancelar edición"
+                        )
                     }
                 }
             }
         }
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
 
         Text(
-            text = "Materias registradas",
+            text =
+                "Materias registradas",
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight =
+                FontWeight.Bold
         )
 
         Spacer(
-            modifier = Modifier.height(10.dp)
+            modifier =
+                Modifier.height(10.dp)
         )
 
-        if (AcademicRepository.materias.isEmpty()) {
+        if (
+            AcademicRepository
+                .materias
+                .isEmpty()
+        ) {
 
             Text(
-                text = "Todavía no tienes materias registradas.",
-                color = Color.Gray
+                text =
+                    "Todavía no tienes materias registradas.",
+                color =
+                    Color.Gray
             )
 
         } else {
 
             LazyColumn(
                 verticalArrangement =
-                    Arrangement.spacedBy(10.dp)
+                    Arrangement.spacedBy(
+                        10.dp
+                    )
             ) {
 
                 items(
-                    items = AcademicRepository.materias,
+                    items =
+                        AcademicRepository
+                            .materias,
                     key = {
                         it.id
                     }
                 ) { materia ->
 
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.White
-                        )
+                        modifier =
+                            Modifier.fillMaxWidth(),
+                        shape =
+                            RoundedCornerShape(
+                                16.dp
+                            ),
+                        colors =
+                            CardDefaults
+                                .cardColors(
+                                    containerColor =
+                                        Color.White
+                                )
                     ) {
 
                         Column(
-                            modifier = Modifier.padding(16.dp)
+                            modifier =
+                                Modifier.padding(
+                                    16.dp
+                                )
                         ) {
 
                             Text(
-                                text = materia.nombre,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
+                                text =
+                                    materia.nombre,
+                                fontSize =
+                                    18.sp,
+                                fontWeight =
+                                    FontWeight.Bold
                             )
 
                             if (
@@ -309,46 +394,61 @@ fun MateriasScreen(
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(4.dp)
+                                        Modifier.height(
+                                            4.dp
+                                        )
                                 )
 
                                 Text(
-                                    text = materia.descripcion,
-                                    color = Color.Gray
+                                    text =
+                                        materia.descripcion,
+                                    color =
+                                        Color.Gray
                                 )
                             }
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(12.dp)
+                                    Modifier.height(
+                                        12.dp
+                                    )
                             )
 
                             Button(
                                 onClick = {
-                                    onVerTemas(materia)
+                                    onVerTemas(
+                                        materia
+                                    )
                                 },
                                 modifier =
                                     Modifier.fillMaxWidth(),
                                 colors =
-                                    ButtonDefaults.buttonColors(
-                                        containerColor =
-                                            colorPrincipal
-                                    )
+                                    ButtonDefaults
+                                        .buttonColors(
+                                            containerColor =
+                                                colorPrincipal
+                                        )
                             ) {
 
-                                Text("VER TEMAS")
+                                Text(
+                                    "VER TEMAS"
+                                )
                             }
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(8.dp)
+                                    Modifier.height(
+                                        8.dp
+                                    )
                             )
 
                             Row(
                                 modifier =
                                     Modifier.fillMaxWidth(),
                                 horizontalArrangement =
-                                    Arrangement.spacedBy(8.dp)
+                                    Arrangement.spacedBy(
+                                        8.dp
+                                    )
                             ) {
 
                                 OutlinedButton(
@@ -366,39 +466,31 @@ fun MateriasScreen(
                                         error = null
                                     },
                                     modifier =
-                                        Modifier.weight(1f)
+                                        Modifier.weight(
+                                            1f
+                                        )
                                 ) {
 
-                                    Text("Editar")
+                                    Text(
+                                        "Editar"
+                                    )
                                 }
 
                                 OutlinedButton(
                                     onClick = {
 
-                                        AcademicRepository
-                                            .eliminarMateria(
-                                                materia.id
-                                            )
-
-                                        if (
-                                            materiaEditando
-                                                ?.id ==
-                                            materia.id
-                                        ) {
-
-                                            materiaEditando =
-                                                null
-
-                                            nombre = ""
-                                            descripcion = ""
-                                            error = null
-                                        }
+                                        materiaAEliminar =
+                                            materia
                                     },
                                     modifier =
-                                        Modifier.weight(1f)
+                                        Modifier.weight(
+                                            1f
+                                        )
                                 ) {
 
-                                    Text("Eliminar")
+                                    Text(
+                                        "Eliminar"
+                                    )
                                 }
                             }
                         }
@@ -406,5 +498,50 @@ fun MateriasScreen(
                 }
             }
         }
+    }
+
+    if (
+        materiaAEliminar !=
+        null
+    ) {
+
+        ConfirmDeleteDialog(
+            titulo =
+                "Eliminar materia",
+            mensaje =
+                "¿Seguro que deseas eliminar \"${materiaAEliminar!!.nombre}\"? También se eliminarán sus temas y materiales.",
+            onConfirm = {
+
+                val id =
+                    materiaAEliminar!!
+                        .id
+
+                AcademicRepository
+                    .eliminarMateria(
+                        id
+                    )
+
+                if (
+                    materiaEditando?.id ==
+                    id
+                ) {
+
+                    materiaEditando =
+                        null
+
+                    nombre = ""
+                    descripcion = ""
+                    error = null
+                }
+
+                materiaAEliminar =
+                    null
+            },
+            onDismiss = {
+
+                materiaAEliminar =
+                    null
+            }
+        )
     }
 }

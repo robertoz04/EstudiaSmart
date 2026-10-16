@@ -37,6 +37,7 @@ import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.data.FlashcardRepository
 import com.estudiasmart.app.model.Dificultad
 import com.estudiasmart.app.model.Flashcard
+import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,8 +75,7 @@ fun FlashcardsScreen(
             )
 
             Spacer(
-                modifier =
-                    Modifier.height(20.dp)
+                modifier = Modifier.height(20.dp)
             )
 
             Text(
@@ -114,6 +114,10 @@ fun FlashcardsScreen(
         mutableStateOf<Flashcard?>(null)
     }
 
+    var flashcardAEliminar by remember {
+        mutableStateOf<Flashcard?>(null)
+    }
+
     val colorPrincipal =
         Color(0xFF4F46E5)
 
@@ -134,8 +138,7 @@ fun FlashcardsScreen(
         item {
 
             Spacer(
-                modifier =
-                    Modifier.height(12.dp)
+                modifier = Modifier.height(12.dp)
             )
 
             TextButton(
@@ -158,8 +161,7 @@ fun FlashcardsScreen(
             )
 
             Spacer(
-                modifier =
-                    Modifier.height(16.dp)
+                modifier = Modifier.height(16.dp)
             )
 
             Card(
@@ -174,8 +176,7 @@ fun FlashcardsScreen(
                     ),
                 elevation =
                     CardDefaults.cardElevation(
-                        defaultElevation =
-                            3.dp
+                        defaultElevation = 3.dp
                     )
             ) {
 
@@ -187,8 +188,7 @@ fun FlashcardsScreen(
                     Text(
                         text =
                             if (
-                                flashcardEditando ==
-                                null
+                                flashcardEditando == null
                             )
                                 "Nueva flashcard"
                             else
@@ -355,8 +355,7 @@ fun FlashcardsScreen(
                             }
 
                             if (
-                                flashcardEditando ==
-                                null
+                                flashcardEditando == null
                             ) {
 
                                 val resultado =
@@ -371,8 +370,7 @@ fun FlashcardsScreen(
                                         )
 
                                 if (
-                                    resultado ==
-                                    null
+                                    resultado == null
                                 ) {
 
                                     pregunta = ""
@@ -402,8 +400,7 @@ fun FlashcardsScreen(
                                         )
 
                                 if (
-                                    resultado ==
-                                    null
+                                    resultado == null
                                 ) {
 
                                     pregunta = ""
@@ -431,8 +428,7 @@ fun FlashcardsScreen(
 
                         Text(
                             if (
-                                flashcardEditando ==
-                                null
+                                flashcardEditando == null
                             )
                                 "AGREGAR FLASHCARD"
                             else
@@ -441,8 +437,7 @@ fun FlashcardsScreen(
                     }
 
                     if (
-                        flashcardEditando !=
-                        null
+                        flashcardEditando != null
                     ) {
 
                         TextButton(
@@ -537,34 +532,61 @@ fun FlashcardsScreen(
                     },
                     onEliminar = {
 
-                        FlashcardRepository
-                            .eliminarFlashcard(
-                                flashcard.id
-                            )
-
-                        if (
-                            flashcardEditando
-                                ?.id ==
-                            flashcard.id
-                        ) {
-
-                            flashcardEditando =
-                                null
-
-                            pregunta = ""
-                            respuesta = ""
-                        }
+                        flashcardAEliminar =
+                            flashcard
                     }
                 )
             }
         }
 
         item {
+
             Spacer(
                 modifier =
                     Modifier.height(30.dp)
             )
         }
+    }
+
+    if (flashcardAEliminar != null) {
+
+        ConfirmDeleteDialog(
+            titulo =
+                "Eliminar flashcard",
+            mensaje =
+                "¿Seguro que deseas eliminar esta flashcard?\n\n\"${flashcardAEliminar!!.pregunta}\"",
+            onConfirm = {
+
+                val id =
+                    flashcardAEliminar!!.id
+
+                FlashcardRepository
+                    .eliminarFlashcard(
+                        id
+                    )
+
+                if (
+                    flashcardEditando?.id ==
+                    id
+                ) {
+
+                    flashcardEditando =
+                        null
+
+                    pregunta = ""
+                    respuesta = ""
+                    error = null
+                }
+
+                flashcardAEliminar =
+                    null
+            },
+            onDismiss = {
+
+                flashcardAEliminar =
+                    null
+            }
+        )
     }
 }
 
@@ -663,6 +685,11 @@ private fun FlashcardCard(
 
             Text(
                 text =
+                    "Revisiones: ${flashcard.revisiones}"
+            )
+
+            Text(
+                text =
                     "Próximo repaso: $fecha",
                 color = Color.Gray
             )
@@ -688,9 +715,7 @@ private fun FlashcardCard(
                 modifier =
                     Modifier.fillMaxWidth(),
                 horizontalArrangement =
-                    Arrangement.spacedBy(
-                        6.dp
-                    )
+                    Arrangement.spacedBy(6.dp)
             ) {
 
                 OutlinedButton(
@@ -751,9 +776,7 @@ private fun FlashcardCard(
                 modifier =
                     Modifier.fillMaxWidth(),
                 horizontalArrangement =
-                    Arrangement.spacedBy(
-                        8.dp
-                    )
+                    Arrangement.spacedBy(8.dp)
             ) {
 
                 OutlinedButton(

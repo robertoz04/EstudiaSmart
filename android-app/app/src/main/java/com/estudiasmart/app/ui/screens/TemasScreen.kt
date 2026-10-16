@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.model.Tema
+import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
 
 @Composable
 fun TemasScreen(
@@ -80,6 +81,10 @@ fun TemasScreen(
     }
 
     var temaEditando by remember {
+        mutableStateOf<Tema?>(null)
+    }
+
+    var temaAEliminar by remember {
         mutableStateOf<Tema?>(null)
     }
 
@@ -167,8 +172,7 @@ fun TemasScreen(
                         Text("Ej. Jetpack Compose")
                     },
                     singleLine = true,
-                    modifier =
-                        Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(
@@ -186,15 +190,13 @@ fun TemasScreen(
                     placeholder = {
                         Text("Descripción del tema")
                     },
-                    modifier =
-                        Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 if (error != null) {
 
                     Spacer(
-                        modifier =
-                            Modifier.height(8.dp)
+                        modifier = Modifier.height(8.dp)
                     )
 
                     Text(
@@ -217,7 +219,8 @@ fun TemasScreen(
                                     .crearTema(
                                         materiaId =
                                             materiaId,
-                                        nombre = nombre,
+                                        nombre =
+                                            nombre,
                                         descripcion =
                                             descripcion
                                     )
@@ -240,7 +243,8 @@ fun TemasScreen(
                                     .actualizarTema(
                                         id =
                                             temaEditando!!.id,
-                                        nombre = nombre,
+                                        nombre =
+                                            nombre,
                                         descripcion =
                                             descripcion
                                     )
@@ -258,13 +262,11 @@ fun TemasScreen(
                             }
                         }
                     },
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                colorPrincipal
-                        )
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor =
+                            colorPrincipal
+                    )
                 ) {
 
                     Text(
@@ -327,7 +329,9 @@ fun TemasScreen(
 
             LazyColumn(
                 verticalArrangement =
-                    Arrangement.spacedBy(10.dp)
+                    Arrangement.spacedBy(
+                        10.dp
+                    )
             ) {
 
                 items(
@@ -341,7 +345,9 @@ fun TemasScreen(
                         modifier =
                             Modifier.fillMaxWidth(),
                         shape =
-                            RoundedCornerShape(16.dp),
+                            RoundedCornerShape(
+                                16.dp
+                            ),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
@@ -351,7 +357,9 @@ fun TemasScreen(
 
                         Column(
                             modifier =
-                                Modifier.padding(16.dp)
+                                Modifier.padding(
+                                    16.dp
+                                )
                         ) {
 
                             Text(
@@ -368,7 +376,9 @@ fun TemasScreen(
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(4.dp)
+                                        Modifier.height(
+                                            4.dp
+                                        )
                                 )
 
                                 Text(
@@ -380,11 +390,14 @@ fun TemasScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(12.dp)
+                                    Modifier.height(
+                                        12.dp
+                                    )
                             )
 
                             Button(
                                 onClick = {
+
                                     onVerMateriales(
                                         tema
                                     )
@@ -392,18 +405,23 @@ fun TemasScreen(
                                 modifier =
                                     Modifier.fillMaxWidth(),
                                 colors =
-                                    ButtonDefaults.buttonColors(
-                                        containerColor =
-                                            colorPrincipal
-                                    )
+                                    ButtonDefaults
+                                        .buttonColors(
+                                            containerColor =
+                                                colorPrincipal
+                                        )
                             ) {
 
-                                Text("VER MATERIALES")
+                                Text(
+                                    "VER MATERIALES"
+                                )
                             }
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(8.dp)
+                                    Modifier.height(
+                                        8.dp
+                                    )
                             )
 
                             Row(
@@ -439,24 +457,8 @@ fun TemasScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        AcademicRepository
-                                            .eliminarTema(
-                                                tema.id
-                                            )
-
-                                        if (
-                                            temaEditando
-                                                ?.id ==
-                                            tema.id
-                                        ) {
-
-                                            temaEditando =
-                                                null
-
-                                            nombre = ""
-                                            descripcion = ""
-                                            error = null
-                                        }
+                                        temaAEliminar =
+                                            tema
                                     },
                                     modifier =
                                         Modifier.weight(1f)
@@ -470,5 +472,42 @@ fun TemasScreen(
                 }
             }
         }
+    }
+
+    if (temaAEliminar != null) {
+
+        ConfirmDeleteDialog(
+            titulo =
+                "Eliminar tema",
+            mensaje =
+                "¿Seguro que deseas eliminar \"${temaAEliminar!!.nombre}\"? También se eliminarán los materiales asociados.",
+            onConfirm = {
+
+                val id =
+                    temaAEliminar!!.id
+
+                AcademicRepository
+                    .eliminarTema(
+                        id
+                    )
+
+                if (
+                    temaEditando?.id ==
+                    id
+                ) {
+
+                    temaEditando = null
+                    nombre = ""
+                    descripcion = ""
+                    error = null
+                }
+
+                temaAEliminar = null
+            },
+            onDismiss = {
+
+                temaAEliminar = null
+            }
+        )
     }
 }

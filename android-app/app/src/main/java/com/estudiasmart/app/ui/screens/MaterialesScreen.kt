@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.model.Material
+import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
 
 @Composable
 fun MaterialesScreen(
@@ -52,7 +53,9 @@ fun MaterialesScreen(
                 .padding(24.dp)
         ) {
 
-            Text("Tema no encontrado.")
+            Text(
+                text = "Tema no encontrado."
+            )
 
             TextButton(
                 onClick = onBack
@@ -77,6 +80,10 @@ fun MaterialesScreen(
     }
 
     var materialEditando by remember {
+        mutableStateOf<Material?>(null)
+    }
+
+    var materialAEliminar by remember {
         mutableStateOf<Material?>(null)
     }
 
@@ -113,7 +120,8 @@ fun MaterialesScreen(
         )
 
         Text(
-            text = "Agrega recursos para estudiar este tema.",
+            text =
+                "Agrega recursos para estudiar este tema.",
             color = Color.Gray
         )
 
@@ -160,10 +168,13 @@ fun MaterialesScreen(
                         Text("Título")
                     },
                     placeholder = {
-                        Text("Ej. Introducción a Compose")
+                        Text(
+                            "Ej. Introducción a Compose"
+                        )
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 Spacer(
@@ -186,7 +197,8 @@ fun MaterialesScreen(
                     },
                     minLines = 3,
                     maxLines = 6,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 if (error != null) {
@@ -253,10 +265,13 @@ fun MaterialesScreen(
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorPrincipal
-                    )
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor =
+                                colorPrincipal
+                        )
                 ) {
 
                     Text(
@@ -277,7 +292,8 @@ fun MaterialesScreen(
                             contenido = ""
                             error = null
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier =
+                            Modifier.fillMaxWidth()
                     ) {
 
                         Text("Cancelar edición")
@@ -318,7 +334,9 @@ fun MaterialesScreen(
 
             LazyColumn(
                 verticalArrangement =
-                    Arrangement.spacedBy(10.dp)
+                    Arrangement.spacedBy(
+                        10.dp
+                    )
             ) {
 
                 items(
@@ -332,7 +350,9 @@ fun MaterialesScreen(
                         modifier =
                             Modifier.fillMaxWidth(),
                         shape =
-                            RoundedCornerShape(16.dp),
+                            RoundedCornerShape(
+                                16.dp
+                            ),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
@@ -342,7 +362,9 @@ fun MaterialesScreen(
 
                         Column(
                             modifier =
-                                Modifier.padding(16.dp)
+                                Modifier.padding(
+                                    16.dp
+                                )
                         ) {
 
                             Text(
@@ -354,7 +376,9 @@ fun MaterialesScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(6.dp)
+                                    Modifier.height(
+                                        6.dp
+                                    )
                             )
 
                             Text(
@@ -364,7 +388,9 @@ fun MaterialesScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(12.dp)
+                                    Modifier.height(
+                                        12.dp
+                                    )
                             )
 
                             Row(
@@ -400,24 +426,8 @@ fun MaterialesScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        AcademicRepository
-                                            .eliminarMaterial(
-                                                material.id
-                                            )
-
-                                        if (
-                                            materialEditando
-                                                ?.id ==
-                                            material.id
-                                        ) {
-
-                                            materialEditando =
-                                                null
-
-                                            titulo = ""
-                                            contenido = ""
-                                            error = null
-                                        }
+                                        materialAEliminar =
+                                            material
                                     },
                                     modifier =
                                         Modifier.weight(1f)
@@ -431,5 +441,42 @@ fun MaterialesScreen(
                 }
             }
         }
+    }
+
+    if (materialAEliminar != null) {
+
+        ConfirmDeleteDialog(
+            titulo =
+                "Eliminar material",
+            mensaje =
+                "¿Seguro que deseas eliminar \"${materialAEliminar!!.titulo}\"? Esta acción no se puede deshacer.",
+            onConfirm = {
+
+                val id =
+                    materialAEliminar!!.id
+
+                AcademicRepository
+                    .eliminarMaterial(
+                        id
+                    )
+
+                if (
+                    materialEditando?.id ==
+                    id
+                ) {
+
+                    materialEditando = null
+                    titulo = ""
+                    contenido = ""
+                    error = null
+                }
+
+                materialAEliminar = null
+            },
+            onDismiss = {
+
+                materialAEliminar = null
+            }
+        )
     }
 }
