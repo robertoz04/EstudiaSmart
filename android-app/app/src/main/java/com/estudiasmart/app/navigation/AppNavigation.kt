@@ -11,6 +11,7 @@ import com.estudiasmart.app.ui.screens.MaterialesScreen
 import com.estudiasmart.app.ui.screens.MateriasScreen
 import com.estudiasmart.app.ui.screens.ProgresoScreen
 import com.estudiasmart.app.ui.screens.QuizScreen
+import com.estudiasmart.app.ui.screens.RecomendacionesScreen
 import com.estudiasmart.app.ui.screens.RegisterScreen
 import com.estudiasmart.app.ui.screens.TemasScreen
 
@@ -32,23 +33,25 @@ fun AppNavigation() {
             LoginScreen(
                 onLoginSuccess = {
 
-                    navController.navigate(
-                        "home"
-                    ) {
-
-                        popUpTo(
-                            "login"
+                    navController
+                        .navigate(
+                            "home"
                         ) {
-                            inclusive =
-                                true
+
+                            popUpTo(
+                                "login"
+                            ) {
+                                inclusive =
+                                    true
+                            }
                         }
-                    }
                 },
                 onRegisterClick = {
 
-                    navController.navigate(
-                        "register"
-                    )
+                    navController
+                        .navigate(
+                            "register"
+                        )
                 }
             )
         }
@@ -58,17 +61,18 @@ fun AppNavigation() {
             RegisterScreen(
                 onRegisterSuccess = {
 
-                    navController.navigate(
-                        "home"
-                    ) {
-
-                        popUpTo(
-                            "register"
+                    navController
+                        .navigate(
+                            "home"
                         ) {
-                            inclusive =
-                                true
+
+                            popUpTo(
+                                "register"
+                            ) {
+                                inclusive =
+                                    true
+                            }
                         }
-                    }
                 },
                 onBackToLogin = {
 
@@ -83,27 +87,38 @@ fun AppNavigation() {
             HomeScreen(
                 onMateriasClick = {
 
-                    navController.navigate(
-                        "materias"
-                    )
+                    navController
+                        .navigate(
+                            "materias"
+                        )
                 },
                 onFlashcardsClick = {
 
-                    navController.navigate(
-                        "flashcards"
-                    )
+                    navController
+                        .navigate(
+                            "flashcards"
+                        )
                 },
                 onQuizClick = {
 
-                    navController.navigate(
-                        "quiz"
-                    )
+                    navController
+                        .navigate(
+                            "quiz"
+                        )
                 },
                 onProgresoClick = {
 
-                    navController.navigate(
-                        "progreso"
-                    )
+                    navController
+                        .navigate(
+                            "progreso"
+                        )
+                },
+                onRecomendacionesClick = {
+
+                    navController
+                        .navigate(
+                            "recomendaciones"
+                        )
                 }
             )
         }
@@ -141,6 +156,19 @@ fun AppNavigation() {
             )
         }
 
+        composable(
+            "recomendaciones"
+        ) {
+
+            RecomendacionesScreen(
+                onBack = {
+
+                    navController
+                        .popBackStack()
+                }
+            )
+        }
+
         composable("materias") {
 
             MateriasScreen(
@@ -152,9 +180,10 @@ fun AppNavigation() {
                 onVerTemas = {
                         materia ->
 
-                    navController.navigate(
-                        "temas/${materia.id}"
-                    )
+                    navController
+                        .navigate(
+                            "temas/${materia.id}"
+                        )
                 }
             )
         }
@@ -184,9 +213,10 @@ fun AppNavigation() {
                 onVerMateriales = {
                         tema ->
 
-                    navController.navigate(
-                        "materiales/${tema.id}"
-                    )
+                    navController
+                        .navigate(
+                            "materiales/${tema.id}"
+                        )
                 }
             )
         }

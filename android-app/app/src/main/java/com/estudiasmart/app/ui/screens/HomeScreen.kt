@@ -34,7 +34,8 @@ fun HomeScreen(
     onMateriasClick: () -> Unit,
     onFlashcardsClick: () -> Unit,
     onQuizClick: () -> Unit,
-    onProgresoClick: () -> Unit
+    onProgresoClick: () -> Unit,
+    onRecomendacionesClick: () -> Unit
 ) {
 
     val colorPrincipal =
@@ -58,19 +59,25 @@ fun HomeScreen(
                 horizontal = 20.dp
             ),
         verticalArrangement =
-            Arrangement.spacedBy(12.dp)
+            Arrangement.spacedBy(
+                12.dp
+            )
     ) {
 
         item {
 
             Spacer(
                 modifier =
-                    Modifier.height(18.dp)
+                    Modifier.height(
+                        18.dp
+                    )
             )
 
             Text(
-                text = "EstudiaSmart",
-                fontSize = 30.sp,
+                text =
+                    "EstudiaSmart",
+                fontSize =
+                    30.sp,
                 fontWeight =
                     FontWeight.Bold,
                 color =
@@ -79,13 +86,16 @@ fun HomeScreen(
 
             Spacer(
                 modifier =
-                    Modifier.height(6.dp)
+                    Modifier.height(
+                        6.dp
+                    )
             )
 
             Text(
                 text =
                     "Hola, ${usuario?.nombre ?: "Estudiante"} 👋",
-                fontSize = 21.sp,
+                fontSize =
+                    21.sp,
                 fontWeight =
                     FontWeight.SemiBold
             )
@@ -99,7 +109,9 @@ fun HomeScreen(
 
             Spacer(
                 modifier =
-                    Modifier.height(12.dp)
+                    Modifier.height(
+                        12.dp
+                    )
             )
         }
 
@@ -115,25 +127,31 @@ fun HomeScreen(
             ) {
 
                 ResumenCard(
-                    titulo = "Materias",
+                    titulo =
+                        "Materias",
                     valor =
                         AcademicRepository
                             .materias
                             .size
                             .toString(),
                     modifier =
-                        Modifier.weight(1f)
+                        Modifier.weight(
+                            1f
+                        )
                 )
 
                 ResumenCard(
-                    titulo = "Temas",
+                    titulo =
+                        "Temas",
                     valor =
                         AcademicRepository
                             .temas
                             .size
                             .toString(),
                     modifier =
-                        Modifier.weight(1f)
+                        Modifier.weight(
+                            1f
+                        )
                 )
             }
         }
@@ -150,25 +168,31 @@ fun HomeScreen(
             ) {
 
                 ResumenCard(
-                    titulo = "Flashcards",
+                    titulo =
+                        "Flashcards",
                     valor =
                         FlashcardRepository
                             .flashcards
                             .size
                             .toString(),
                     modifier =
-                        Modifier.weight(1f)
+                        Modifier.weight(
+                            1f
+                        )
                 )
 
                 ResumenCard(
-                    titulo = "Quiz",
+                    titulo =
+                        "Quiz",
                     valor =
                         QuizRepository
                             .quizzes
                             .size
                             .toString(),
                     modifier =
-                        Modifier.weight(1f)
+                        Modifier.weight(
+                            1f
+                        )
                 )
             }
         }
@@ -211,11 +235,13 @@ fun HomeScreen(
 
                         Text(
                             text =
-                                "${String.format(
-                                    Locale.getDefault(),
-                                    "%.0f",
-                                    progresoGeneral
-                                )}%",
+                                "${
+                                    String.format(
+                                        Locale.getDefault(),
+                                        "%.0f",
+                                        progresoGeneral
+                                    )
+                                }%",
                             fontSize =
                                 28.sp,
                             fontWeight =
@@ -246,15 +272,32 @@ fun HomeScreen(
 
         item {
 
+            ToolCard(
+                titulo =
+                    "🎯 ¿Qué debo estudiar hoy?",
+                descripcion =
+                    "Recibe recomendaciones según tu progreso, dificultad y necesidad de repaso.",
+                boton =
+                    "VER RECOMENDACIONES",
+                onClick =
+                    onRecomendacionesClick
+            )
+        }
+
+        item {
+
             Spacer(
                 modifier =
-                    Modifier.height(8.dp)
+                    Modifier.height(
+                        6.dp
+                    )
             )
 
             Text(
                 text =
                     "Tus herramientas de estudio",
-                fontSize = 20.sp,
+                fontSize =
+                    20.sp,
                 fontWeight =
                     FontWeight.Bold
             )
@@ -320,7 +363,9 @@ fun HomeScreen(
 
             Spacer(
                 modifier =
-                    Modifier.height(30.dp)
+                    Modifier.height(
+                        30.dp
+                    )
             )
         }
     }
@@ -356,7 +401,8 @@ private fun ToolCard(
         ) {
 
             Text(
-                text = titulo,
+                text =
+                    titulo,
                 fontSize =
                     18.sp,
                 fontWeight =
@@ -365,7 +411,9 @@ private fun ToolCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(4.dp)
+                    Modifier.height(
+                        4.dp
+                    )
             )
 
             Text(
@@ -377,7 +425,9 @@ private fun ToolCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(12.dp)
+                    Modifier.height(
+                        12.dp
+                    )
             )
 
             Button(
@@ -386,10 +436,13 @@ private fun ToolCard(
                 modifier =
                     Modifier.fillMaxWidth(),
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            Color(0xFF4F46E5)
-                    )
+                    ButtonDefaults
+                        .buttonColors(
+                            containerColor =
+                                Color(
+                                    0xFF4F46E5
+                                )
+                        )
             ) {
 
                 Text(
@@ -442,7 +495,9 @@ private fun ResumenCard(
                 fontWeight =
                     FontWeight.Bold,
                 color =
-                    Color(0xFF4F46E5)
+                    Color(
+                        0xFF4F46E5
+                    )
             )
 
             Text(
