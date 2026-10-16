@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.estudiasmart.app.ui.screens.FlashcardsScreen
 import com.estudiasmart.app.ui.screens.HomeScreen
 import com.estudiasmart.app.ui.screens.LoginScreen
 import com.estudiasmart.app.ui.screens.MaterialesScreen
@@ -18,8 +19,10 @@ fun AppNavigation() {
         rememberNavController()
 
     NavHost(
-        navController = navController,
-        startDestination = "login"
+        navController =
+            navController,
+        startDestination =
+            "login"
     ) {
 
         composable("login") {
@@ -27,18 +30,23 @@ fun AppNavigation() {
             LoginScreen(
                 onLoginSuccess = {
 
-                    navController.navigate("home") {
+                    navController
+                        .navigate("home") {
 
-                        popUpTo("login") {
-                            inclusive = true
+                            popUpTo(
+                                "login"
+                            ) {
+                                inclusive =
+                                    true
+                            }
                         }
-                    }
                 },
                 onRegisterClick = {
 
-                    navController.navigate(
-                        "register"
-                    )
+                    navController
+                        .navigate(
+                            "register"
+                        )
                 }
             )
         }
@@ -48,16 +56,21 @@ fun AppNavigation() {
             RegisterScreen(
                 onRegisterSuccess = {
 
-                    navController.navigate("home") {
+                    navController
+                        .navigate("home") {
 
-                        popUpTo("register") {
-                            inclusive = true
+                            popUpTo(
+                                "register"
+                            ) {
+                                inclusive =
+                                    true
+                            }
                         }
-                    }
                 },
                 onBackToLogin = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 }
             )
         }
@@ -67,9 +80,30 @@ fun AppNavigation() {
             HomeScreen(
                 onMateriasClick = {
 
-                    navController.navigate(
-                        "materias"
-                    )
+                    navController
+                        .navigate(
+                            "materias"
+                        )
+                },
+                onFlashcardsClick = {
+
+                    navController
+                        .navigate(
+                            "flashcards"
+                        )
+                }
+            )
+        }
+
+        composable(
+            "flashcards"
+        ) {
+
+            FlashcardsScreen(
+                onBack = {
+
+                    navController
+                        .popBackStack()
                 }
             )
         }
@@ -79,57 +113,76 @@ fun AppNavigation() {
             MateriasScreen(
                 onBack = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 },
-                onVerTemas = { materia ->
+                onVerTemas = {
+                        materia ->
 
-                    navController.navigate(
-                        "temas/${materia.id}"
-                    )
+                    navController
+                        .navigate(
+                            "temas/${materia.id}"
+                        )
                 }
             )
         }
 
         composable(
-            route = "temas/{materiaId}"
-        ) { backStackEntry ->
+            route =
+                "temas/{materiaId}"
+        ) {
+                backStackEntry ->
 
             val materiaId =
-                backStackEntry.arguments
-                    ?.getString("materiaId")
+                backStackEntry
+                    .arguments
+                    ?.getString(
+                        "materiaId"
+                    )
                     ?.toIntOrNull()
                     ?: 0
 
             TemasScreen(
-                materiaId = materiaId,
+                materiaId =
+                    materiaId,
                 onBack = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 },
-                onVerMateriales = { tema ->
+                onVerMateriales = {
+                        tema ->
 
-                    navController.navigate(
-                        "materiales/${tema.id}"
-                    )
+                    navController
+                        .navigate(
+                            "materiales/${tema.id}"
+                        )
                 }
             )
         }
 
         composable(
-            route = "materiales/{temaId}"
-        ) { backStackEntry ->
+            route =
+                "materiales/{temaId}"
+        ) {
+                backStackEntry ->
 
             val temaId =
-                backStackEntry.arguments
-                    ?.getString("temaId")
+                backStackEntry
+                    .arguments
+                    ?.getString(
+                        "temaId"
+                    )
                     ?.toIntOrNull()
                     ?: 0
 
             MaterialesScreen(
-                temaId = temaId,
+                temaId =
+                    temaId,
                 onBack = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 }
             )
         }
