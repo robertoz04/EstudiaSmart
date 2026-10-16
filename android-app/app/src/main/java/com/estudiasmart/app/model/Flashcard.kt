@@ -7,6 +7,7 @@ data class Flashcard(
     val respuesta: String,
     val dificultad: Dificultad = Dificultad.REGULAR,
     val racha: Int = 0,
+    val revisiones: Int = 0,
     val proximaRevisionMillis: Long =
         System.currentTimeMillis()
 )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,13 +25,16 @@ import androidx.compose.ui.unit.sp
 import com.estudiasmart.app.data.AcademicRepository
 import com.estudiasmart.app.data.AuthRepository
 import com.estudiasmart.app.data.FlashcardRepository
+import com.estudiasmart.app.data.ProgresoService
 import com.estudiasmart.app.data.QuizRepository
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
     onMateriasClick: () -> Unit,
     onFlashcardsClick: () -> Unit,
-    onQuizClick: () -> Unit
+    onQuizClick: () -> Unit,
+    onProgresoClick: () -> Unit
 ) {
 
     val colorPrincipal =
@@ -42,182 +46,283 @@ fun HomeScreen(
     val usuario =
         AuthRepository.usuarioActual
 
-    Column(
+    val progresoGeneral =
+        ProgresoService
+            .calcularPromedioGeneral()
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(fondo)
-            .padding(20.dp)
+            .padding(
+                horizontal = 20.dp
+            ),
+        verticalArrangement =
+            Arrangement.spacedBy(12.dp)
     ) {
 
-        Spacer(
-            modifier =
-                Modifier.height(16.dp)
-        )
+        item {
 
-        Text(
-            text = "EstudiaSmart",
-            fontSize = 30.sp,
-            fontWeight =
-                FontWeight.Bold,
-            color =
-                colorPrincipal
-        )
-
-        Spacer(
-            modifier =
-                Modifier.height(6.dp)
-        )
-
-        Text(
-            text =
-                "Hola, ${usuario?.nombre ?: "Estudiante"} 👋",
-            fontSize = 21.sp,
-            fontWeight =
-                FontWeight.SemiBold
-        )
-
-        Text(
-            text =
-                "¿Qué quieres estudiar hoy?",
-            color =
-                Color.Gray
-        )
-
-        Spacer(
-            modifier =
-                Modifier.height(24.dp)
-        )
-
-        Row(
-            modifier =
-                Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.spacedBy(
-                    12.dp
-                )
-        ) {
-
-            ResumenCard(
-                titulo = "Materias",
-                valor =
-                    AcademicRepository
-                        .materias.size
-                        .toString(),
+            Spacer(
                 modifier =
-                    Modifier.weight(1f)
+                    Modifier.height(18.dp)
             )
 
-            ResumenCard(
-                titulo = "Temas",
-                valor =
-                    AcademicRepository
-                        .temas.size
-                        .toString(),
+            Text(
+                text = "EstudiaSmart",
+                fontSize = 30.sp,
+                fontWeight =
+                    FontWeight.Bold,
+                color =
+                    colorPrincipal
+            )
+
+            Spacer(
                 modifier =
-                    Modifier.weight(1f)
+                    Modifier.height(6.dp)
+            )
+
+            Text(
+                text =
+                    "Hola, ${usuario?.nombre ?: "Estudiante"} 👋",
+                fontSize = 21.sp,
+                fontWeight =
+                    FontWeight.SemiBold
+            )
+
+            Text(
+                text =
+                    "¿Qué quieres estudiar hoy?",
+                color =
+                    Color.Gray
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(12.dp)
             )
         }
 
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
+        item {
 
-        Row(
-            modifier =
-                Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.spacedBy(
-                    12.dp
-                )
-        ) {
-
-            ResumenCard(
-                titulo = "Flashcards",
-                valor =
-                    FlashcardRepository
-                        .flashcards.size
-                        .toString(),
+            Row(
                 modifier =
-                    Modifier.weight(1f)
+                    Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.spacedBy(
+                        12.dp
+                    )
+            ) {
+
+                ResumenCard(
+                    titulo = "Materias",
+                    valor =
+                        AcademicRepository
+                            .materias
+                            .size
+                            .toString(),
+                    modifier =
+                        Modifier.weight(1f)
+                )
+
+                ResumenCard(
+                    titulo = "Temas",
+                    valor =
+                        AcademicRepository
+                            .temas
+                            .size
+                            .toString(),
+                    modifier =
+                        Modifier.weight(1f)
+                )
+            }
+        }
+
+        item {
+
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.spacedBy(
+                        12.dp
+                    )
+            ) {
+
+                ResumenCard(
+                    titulo = "Flashcards",
+                    valor =
+                        FlashcardRepository
+                            .flashcards
+                            .size
+                            .toString(),
+                    modifier =
+                        Modifier.weight(1f)
+                )
+
+                ResumenCard(
+                    titulo = "Quiz",
+                    valor =
+                        QuizRepository
+                            .quizzes
+                            .size
+                            .toString(),
+                    modifier =
+                        Modifier.weight(1f)
+                )
+            }
+        }
+
+        item {
+
+            Card(
+                modifier =
+                    Modifier.fillMaxWidth(),
+                shape =
+                    RoundedCornerShape(
+                        18.dp
+                    ),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor =
+                            Color.White
+                    )
+            ) {
+
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                18.dp
+                            ),
+                    horizontalArrangement =
+                        Arrangement.SpaceBetween
+                ) {
+
+                    Column {
+
+                        Text(
+                            text =
+                                "Progreso general",
+                            color =
+                                Color.Gray
+                        )
+
+                        Text(
+                            text =
+                                "${String.format(
+                                    Locale.getDefault(),
+                                    "%.0f",
+                                    progresoGeneral
+                                )}%",
+                            fontSize =
+                                28.sp,
+                            fontWeight =
+                                FontWeight.Bold,
+                            color =
+                                colorPrincipal
+                        )
+                    }
+
+                    Button(
+                        onClick =
+                            onProgresoClick,
+                        colors =
+                            ButtonDefaults
+                                .buttonColors(
+                                    containerColor =
+                                        colorPrincipal
+                                )
+                    ) {
+
+                        Text(
+                            "VER PROGRESO"
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+
+            Spacer(
+                modifier =
+                    Modifier.height(8.dp)
             )
 
-            ResumenCard(
-                titulo = "Quiz",
-                valor =
-                    QuizRepository
-                        .quizzes.size
-                        .toString(),
-                modifier =
-                    Modifier.weight(1f)
+            Text(
+                text =
+                    "Tus herramientas de estudio",
+                fontSize = 20.sp,
+                fontWeight =
+                    FontWeight.Bold
             )
         }
 
-        Spacer(
-            modifier =
-                Modifier.height(28.dp)
-        )
+        item {
 
-        Text(
-            text =
-                "Tus herramientas de estudio",
-            fontSize = 20.sp,
-            fontWeight =
-                FontWeight.Bold
-        )
+            ToolCard(
+                titulo =
+                    "📚 Mis materias",
+                descripcion =
+                    "Administra tus materias, temas y materiales.",
+                boton =
+                    "ABRIR MIS MATERIAS",
+                onClick =
+                    onMateriasClick
+            )
+        }
 
-        Spacer(
-            modifier =
-                Modifier.height(14.dp)
-        )
+        item {
 
-        ToolCard(
-            titulo =
-                "📚 Mis materias",
-            descripcion =
-                "Administra tus materias, temas y materiales.",
-            boton =
-                "ABRIR MIS MATERIAS",
-            onClick =
-                onMateriasClick
-        )
+            ToolCard(
+                titulo =
+                    "🧠 Flashcards",
+                descripcion =
+                    "Repasa conceptos con repetición espaciada.",
+                boton =
+                    "ABRIR FLASHCARDS",
+                onClick =
+                    onFlashcardsClick
+            )
+        }
 
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
+        item {
 
-        ToolCard(
-            titulo =
-                "🧠 Flashcards",
-            descripcion =
-                "Repasa conceptos con repetición espaciada.",
-            boton =
-                "ABRIR FLASHCARDS",
-            onClick =
-                onFlashcardsClick
-        )
+            ToolCard(
+                titulo =
+                    "📝 Quiz",
+                descripcion =
+                    "Evalúa tus conocimientos y revisa tus resultados.",
+                boton =
+                    "ABRIR QUIZ",
+                onClick =
+                    onQuizClick
+            )
+        }
 
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
+        item {
 
-        ToolCard(
-            titulo =
-                "📝 Quiz",
-            descripcion =
-                "Evalúa tus conocimientos y revisa tus resultados.",
-            boton =
-                "ABRIR QUIZ",
-            onClick =
-                onQuizClick
-        )
+            ToolCard(
+                titulo =
+                    "📊 Mi progreso",
+                descripcion =
+                    "Consulta tu dominio en cada tema según quizzes y flashcards.",
+                boton =
+                    "VER MI PROGRESO",
+                onClick =
+                    onProgresoClick
+            )
+        }
 
-        Spacer(
-            modifier =
-                Modifier.height(20.dp)
-        )
+        item {
+
+            Spacer(
+                modifier =
+                    Modifier.height(30.dp)
+            )
+        }
     }
 }
 
@@ -258,6 +363,11 @@ private fun ToolCard(
                     FontWeight.Bold
             )
 
+            Spacer(
+                modifier =
+                    Modifier.height(4.dp)
+            )
+
             Text(
                 text =
                     descripcion,
@@ -267,9 +377,7 @@ private fun ToolCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(
-                        12.dp
-                    )
+                    Modifier.height(12.dp)
             )
 
             Button(

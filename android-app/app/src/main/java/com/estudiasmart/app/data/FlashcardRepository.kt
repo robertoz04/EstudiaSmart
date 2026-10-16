@@ -97,6 +97,10 @@ object FlashcardRepository {
             return "La pregunta es obligatoria."
         }
 
+        if (preguntaLimpia.length < 3) {
+            return "La pregunta debe tener al menos 3 caracteres."
+        }
+
         if (respuestaLimpia.isBlank()) {
             return "La respuesta es obligatoria."
         }
@@ -198,6 +202,8 @@ object FlashcardRepository {
             actual.copy(
                 dificultad = dificultad,
                 racha = nuevaRacha,
+                revisiones =
+                    actual.revisiones + 1,
                 proximaRevisionMillis =
                     proximaRevision
             )
@@ -215,12 +221,44 @@ object FlashcardRepository {
         }
     }
 
+    fun flashcardsPorTema(
+        temaId: Int
+    ): List<Flashcard> {
+
+        return _flashcards.filter {
+            it.temaId == temaId
+        }
+    }
+
+    fun obtenerFlashcard(
+        id: Int
+    ): Flashcard? {
+
+        return _flashcards.find {
+            it.id == id
+        }
+    }
+
     fun eliminarPorTema(
         temaId: Int
     ) {
 
         _flashcards.removeAll {
             it.temaId == temaId
+        }
+    }
+
+    fun totalRevisiones(): Int {
+
+        return _flashcards.sumOf {
+            it.revisiones
+        }
+    }
+
+    fun flashcardsEstudiadas(): Int {
+
+        return _flashcards.count {
+            it.revisiones > 0
         }
     }
 }
