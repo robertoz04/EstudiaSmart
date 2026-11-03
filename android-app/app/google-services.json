@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "626496038135",
+    "project_id": "estudiasmart-84bd5",
+    "storage_bucket": "estudiasmart-84bd5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626496038135:android:ead9072166a084a5c29ff2",
+        "android_client_info": {
+          "package_name": "com.estudiasmart.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzpioo2SJlJP_XQvB4nf9k-oWsa-GJ_qY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
