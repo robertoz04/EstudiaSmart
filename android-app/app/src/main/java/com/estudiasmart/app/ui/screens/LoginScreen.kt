@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -59,16 +60,25 @@ fun LoginScreen(
         mutableStateOf<String?>(null)
     }
 
-    val colorPrincipal = Color(0xFF4F46E5)
-    val fondo = Color(0xFFF6F7FB)
+    var cargando by remember {
+        mutableStateOf(false)
+    }
+
+    val colorPrincipal =
+        Color(0xFF4F46E5)
+
+    val fondo =
+        Color(0xFFF6F7FB)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(fondo)
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
 
         Text(
@@ -104,92 +114,131 @@ fun LoginScreen(
         ) {
 
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier =
+                    Modifier.padding(24.dp)
             ) {
 
                 Text(
                     text = "Iniciar sesión",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    style =
+                        MaterialTheme
+                            .typography
+                            .headlineSmall,
+                    fontWeight =
+                        FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.height(8.dp)
+                    modifier =
+                        Modifier.height(8.dp)
                 )
 
                 Text(
-                    text = "Ingresa tus datos para continuar.",
+                    text =
+                        "Ingresa tus datos para continuar.",
                     color = Color.Gray
                 )
 
                 Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier =
+                        Modifier.height(24.dp)
                 )
 
                 OutlinedTextField(
                     value = correo,
                     onValueChange = {
+
                         correo = it
+
                         errorCorreo = null
                         errorGeneral = null
                     },
                     label = {
-                        Text("Correo electrónico")
+                        Text(
+                            "Correo electrónico"
+                        )
                     },
                     placeholder = {
-                        Text("correo@ejemplo.com")
+                        Text(
+                            "correo@ejemplo.com"
+                        )
                     },
-                    isError = errorCorreo != null,
+                    enabled = !cargando,
+                    isError =
+                        errorCorreo != null,
                     supportingText = {
+
                         errorCorreo?.let {
+
                             Text(it)
                         }
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier =
+                        Modifier.height(12.dp)
                 )
 
                 OutlinedTextField(
                     value = contrasena,
                     onValueChange = {
+
                         contrasena = it
-                        errorContrasena = null
-                        errorGeneral = null
+
+                        errorContrasena =
+                            null
+
+                        errorGeneral =
+                            null
                     },
                     label = {
                         Text("Contraseña")
                     },
-                    visualTransformation = PasswordVisualTransformation(),
-                    isError = errorContrasena != null,
+                    visualTransformation =
+                        PasswordVisualTransformation(),
+                    enabled = !cargando,
+                    isError =
+                        errorContrasena != null,
                     supportingText = {
+
                         errorContrasena?.let {
+
                             Text(it)
                         }
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 if (errorGeneral != null) {
 
                     Spacer(
-                        modifier = Modifier.height(8.dp)
+                        modifier =
+                            Modifier.height(8.dp)
                     )
 
                     Text(
-                        text = errorGeneral!!,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        text =
+                            errorGeneral!!,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .error,
+                        modifier =
+                            Modifier.fillMaxWidth(),
+                        textAlign =
+                            TextAlign.Center
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier =
+                        Modifier.height(24.dp)
                 )
 
                 Button(
@@ -199,73 +248,139 @@ fun LoginScreen(
                         errorContrasena = null
                         errorGeneral = null
 
-                        var formularioValido = true
+                        val correoLimpio =
+                            correo.trim()
 
-                        if (correo.isBlank()) {
+                        var formularioValido =
+                            true
+
+                        if (
+                            correoLimpio.isBlank()
+                        ) {
 
                             errorCorreo =
                                 "El correo es obligatorio."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
 
                         } else if (
-                            !Patterns.EMAIL_ADDRESS
-                                .matcher(correo)
+                            !Patterns
+                                .EMAIL_ADDRESS
+                                .matcher(
+                                    correoLimpio
+                                )
                                 .matches()
                         ) {
 
                             errorCorreo =
                                 "Ingrese un correo válido."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
                         }
 
-                        if (contrasena.isBlank()) {
+                        if (
+                            contrasena.isBlank()
+                        ) {
 
                             errorContrasena =
                                 "La contraseña es obligatoria."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
                         }
 
-                        if (formularioValido) {
+                        if (
+                            formularioValido
+                        ) {
 
-                            val resultado =
-                                AuthRepository.iniciarSesion(
-                                    correo = correo,
-                                    contrasena = contrasena
-                                )
+                            cargando = true
 
-                            if (resultado == null) {
+                            AuthRepository
+                                .iniciarSesion(
+                                    correo =
+                                        correoLimpio,
+                                    contrasena =
+                                        contrasena
+                                ) { resultado ->
 
-                                onLoginSuccess()
+                                    cargando =
+                                        false
 
-                            } else {
+                                    if (
+                                        resultado ==
+                                        null
+                                    ) {
 
-                                errorGeneral = resultado
-                            }
+                                        onLoginSuccess()
+
+                                    } else {
+
+                                        errorGeneral =
+                                            resultado
+                                    }
+                                }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorPrincipal
-                    )
+                    enabled = !cargando,
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    shape =
+                        RoundedCornerShape(
+                            12.dp
+                        ),
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    colorPrincipal
+                            )
                 ) {
 
-                    Text(
-                        text = "INICIAR SESIÓN",
-                        modifier = Modifier.padding(6.dp)
-                    )
+                    if (cargando) {
+
+                        CircularProgressIndicator(
+                            modifier =
+                                Modifier
+                                    .height(22.dp)
+                                    .padding(
+                                        end = 6.dp
+                                    ),
+                            strokeWidth = 2.dp,
+                            color = Color.White
+                        )
+
+                        Text(
+                            text =
+                                "INICIANDO SESIÓN..."
+                        )
+
+                    } else {
+
+                        Text(
+                            text =
+                                "INICIAR SESIÓN",
+                            modifier =
+                                Modifier.padding(
+                                    6.dp
+                                )
+                        )
+                    }
                 }
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier =
+                        Modifier.height(12.dp)
                 )
 
                 TextButton(
-                    onClick = onRegisterClick,
-                    modifier = Modifier.fillMaxWidth()
+                    onClick =
+                        onRegisterClick,
+                    enabled =
+                        !cargando,
+                    modifier =
+                        Modifier.fillMaxWidth()
                 ) {
 
                     Text(
