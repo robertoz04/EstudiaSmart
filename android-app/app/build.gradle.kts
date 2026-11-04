@@ -26,9 +26,7 @@ android {
     }
 
     buildTypes {
-
         release {
-
             optimization {
                 enable = true
 
@@ -118,6 +116,23 @@ dependencies {
 
     implementation(
         "com.google.firebase:firebase-firestore"
+    )
+
+    // =========================
+    // GOOGLE SIGN-IN
+    // CREDENTIAL MANAGER
+    // =========================
+
+    implementation(
+        "androidx.credentials:credentials:1.6.0"
+    )
+
+    implementation(
+        "androidx.credentials:credentials-play-services-auth:1.6.0"
+    )
+
+    implementation(
+        "com.google.android.libraries.identity.googleid:googleid:1.1.1"
     )
 
     // =========================
