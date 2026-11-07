@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "626496038135",
+    "project_id": "estudiasmart-84bd5",
+    "storage_bucket": "estudiasmart-84bd5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626496038135:android:ead9072166a084a5c29ff2",
+        "android_client_info": {
+          "package_name": "com.estudiasmart.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "626496038135-97s1k87lq7ra0b7818dsfq5usg1sn1g1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.estudiasmart.app",
+            "certificate_hash": "c54586044e26594be7fbf6de07b523a0d883c8a4"
+          }
+        },
+        {
+          "client_id": "626496038135-k5ci467nj74ddi3dn1rg171l0niesjpi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzpioo2SJlJP_XQvB4nf9k-oWsa-GJ_qY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "626496038135-k5ci467nj74ddi3dn1rg171l0niesjpi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

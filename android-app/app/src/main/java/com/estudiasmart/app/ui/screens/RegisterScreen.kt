@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -77,21 +78,33 @@ fun RegisterScreen(
         mutableStateOf<String?>(null)
     }
 
-    val colorPrincipal = Color(0xFF4F46E5)
-    val fondo = Color(0xFFF6F7FB)
+    var cargando by remember {
+        mutableStateOf(false)
+    }
+
+    val colorPrincipal =
+        Color(0xFF4F46E5)
+
+    val fondo =
+        Color(0xFFF6F7FB)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(fondo)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement =
+            Arrangement.Center,
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
 
         Text(
@@ -102,159 +115,234 @@ fun RegisterScreen(
         )
 
         Spacer(
-            modifier = Modifier.height(8.dp)
+            modifier =
+                Modifier.height(8.dp)
         )
 
         Text(
-            text = "Crea tu cuenta y comienza a estudiar",
+            text =
+                "Crea tu cuenta y comienza a estudiar",
             fontSize = 15.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
         )
 
         Spacer(
-            modifier = Modifier.height(24.dp)
+            modifier =
+                Modifier.height(24.dp)
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
-            )
+            modifier =
+                Modifier.fillMaxWidth(),
+            shape =
+                RoundedCornerShape(24.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        Color.White
+                ),
+            elevation =
+                CardDefaults.cardElevation(
+                    defaultElevation =
+                        4.dp
+                )
         ) {
 
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier =
+                    Modifier.padding(24.dp)
             ) {
 
                 Text(
                     text = "Crear cuenta",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    style =
+                        MaterialTheme
+                            .typography
+                            .headlineSmall,
+                    fontWeight =
+                        FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.height(6.dp)
+                    modifier =
+                        Modifier.height(6.dp)
                 )
 
                 Text(
-                    text = "Completa tus datos para continuar.",
+                    text =
+                        "Completa tus datos para continuar.",
                     color = Color.Gray
                 )
 
                 Spacer(
-                    modifier = Modifier.height(20.dp)
+                    modifier =
+                        Modifier.height(20.dp)
                 )
 
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = {
+
                         nombre = it
+
                         errorNombre = null
                         errorGeneral = null
                     },
                     label = {
-                        Text("Nombre completo")
+                        Text(
+                            "Nombre completo"
+                        )
                     },
                     placeholder = {
-                        Text("Ej. Beatriz Pérez")
+                        Text(
+                            "Ej. Beatriz Pérez"
+                        )
                     },
-                    isError = errorNombre != null,
+                    enabled = !cargando,
+                    isError =
+                        errorNombre != null,
                     supportingText = {
+
                         errorNombre?.let {
+
                             Text(it)
                         }
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = correo,
                     onValueChange = {
+
                         correo = it
+
                         errorCorreo = null
                         errorGeneral = null
                     },
                     label = {
-                        Text("Correo electrónico")
+                        Text(
+                            "Correo electrónico"
+                        )
                     },
                     placeholder = {
-                        Text("correo@ejemplo.com")
+                        Text(
+                            "correo@ejemplo.com"
+                        )
                     },
-                    isError = errorCorreo != null,
+                    enabled = !cargando,
+                    isError =
+                        errorCorreo != null,
                     supportingText = {
+
                         errorCorreo?.let {
+
                             Text(it)
                         }
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = contrasena,
                     onValueChange = {
+
                         contrasena = it
-                        errorContrasena = null
-                        errorConfirmacion = null
-                        errorGeneral = null
+
+                        errorContrasena =
+                            null
+
+                        errorConfirmacion =
+                            null
+
+                        errorGeneral =
+                            null
                     },
                     label = {
                         Text("Contraseña")
                     },
-                    visualTransformation = PasswordVisualTransformation(),
-                    isError = errorContrasena != null,
+                    visualTransformation =
+                        PasswordVisualTransformation(),
+                    enabled = !cargando,
+                    isError =
+                        errorContrasena != null,
                     supportingText = {
+
                         errorContrasena?.let {
+
                             Text(it)
                         }
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
-                    value = confirmarContrasena,
+                    value =
+                        confirmarContrasena,
                     onValueChange = {
-                        confirmarContrasena = it
-                        errorConfirmacion = null
-                        errorGeneral = null
+
+                        confirmarContrasena =
+                            it
+
+                        errorConfirmacion =
+                            null
+
+                        errorGeneral =
+                            null
                     },
                     label = {
-                        Text("Confirmar contraseña")
+                        Text(
+                            "Confirmar contraseña"
+                        )
                     },
-                    visualTransformation = PasswordVisualTransformation(),
-                    isError = errorConfirmacion != null,
+                    visualTransformation =
+                        PasswordVisualTransformation(),
+                    enabled = !cargando,
+                    isError =
+                        errorConfirmacion != null,
                     supportingText = {
+
                         errorConfirmacion?.let {
+
                             Text(it)
                         }
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 if (errorGeneral != null) {
 
                     Spacer(
-                        modifier = Modifier.height(8.dp)
+                        modifier =
+                            Modifier.height(8.dp)
                     )
 
                     Text(
-                        text = errorGeneral!!,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        text =
+                            errorGeneral!!,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .error,
+                        modifier =
+                            Modifier.fillMaxWidth(),
+                        textAlign =
+                            TextAlign.Center
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.height(20.dp)
+                    modifier =
+                        Modifier.height(20.dp)
                 )
 
                 Button(
@@ -266,113 +354,220 @@ fun RegisterScreen(
                         errorConfirmacion = null
                         errorGeneral = null
 
-                        var formularioValido = true
+                        val nombreLimpio =
+                            nombre.trim()
 
-                        if (nombre.isBlank()) {
+                        val correoLimpio =
+                            correo
+                                .trim()
+                                .lowercase()
+
+                        var formularioValido =
+                            true
+
+                        // =========================
+                        // VALIDAR NOMBRE
+                        // =========================
+
+                        if (
+                            nombreLimpio.isBlank()
+                        ) {
 
                             errorNombre =
                                 "El nombre es obligatorio."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
 
-                        } else if (nombre.trim().length < 3) {
+                        } else if (
+                            nombreLimpio.length < 3
+                        ) {
 
                             errorNombre =
                                 "El nombre debe tener al menos 3 caracteres."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
                         }
 
-                        if (correo.isBlank()) {
+                        // =========================
+                        // VALIDAR CORREO
+                        // =========================
+
+                        if (
+                            correoLimpio.isBlank()
+                        ) {
 
                             errorCorreo =
                                 "El correo es obligatorio."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
 
                         } else if (
-                            !Patterns.EMAIL_ADDRESS
-                                .matcher(correo)
+                            !Patterns
+                                .EMAIL_ADDRESS
+                                .matcher(
+                                    correoLimpio
+                                )
                                 .matches()
                         ) {
 
                             errorCorreo =
                                 "Ingrese un correo válido."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
                         }
 
-                        if (contrasena.isBlank()) {
+                        // =========================
+                        // VALIDAR CONTRASEÑA
+                        // =========================
+
+                        if (
+                            contrasena.isBlank()
+                        ) {
 
                             errorContrasena =
                                 "La contraseña es obligatoria."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
 
-                        } else if (contrasena.length < 6) {
+                        } else if (
+                            contrasena.length < 6
+                        ) {
 
                             errorContrasena =
                                 "Debe tener al menos 6 caracteres."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
                         }
 
-                        if (confirmarContrasena.isBlank()) {
+                        // =========================
+                        // CONFIRMAR CONTRASEÑA
+                        // =========================
+
+                        if (
+                            confirmarContrasena
+                                .isBlank()
+                        ) {
 
                             errorConfirmacion =
                                 "Confirme su contraseña."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
 
                         } else if (
-                            confirmarContrasena != contrasena
+                            confirmarContrasena !=
+                            contrasena
                         ) {
 
                             errorConfirmacion =
                                 "Las contraseñas no coinciden."
 
-                            formularioValido = false
+                            formularioValido =
+                                false
                         }
 
-                        if (formularioValido) {
+                        // =========================
+                        // REGISTRO FIREBASE
+                        // =========================
 
-                            val resultado =
-                                AuthRepository.registrar(
-                                    nombre = nombre,
-                                    correo = correo,
-                                    contrasena = contrasena
-                                )
+                        if (
+                            formularioValido
+                        ) {
 
-                            if (resultado == null) {
+                            cargando = true
 
-                                onRegisterSuccess()
+                            AuthRepository
+                                .registrar(
+                                    nombre =
+                                        nombreLimpio,
+                                    correo =
+                                        correoLimpio,
+                                    contrasena =
+                                        contrasena
+                                ) { resultado ->
 
-                            } else {
+                                    cargando =
+                                        false
 
-                                errorGeneral = resultado
-                            }
+                                    if (
+                                        resultado ==
+                                        null
+                                    ) {
+
+                                        onRegisterSuccess()
+
+                                    } else {
+
+                                        errorGeneral =
+                                            resultado
+                                    }
+                                }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorPrincipal
-                    )
+                    enabled = !cargando,
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    shape =
+                        RoundedCornerShape(
+                            12.dp
+                        ),
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    colorPrincipal
+                            )
                 ) {
 
-                    Text(
-                        text = "CREAR CUENTA",
-                        modifier = Modifier.padding(6.dp)
-                    )
+                    if (cargando) {
+
+                        CircularProgressIndicator(
+                            modifier =
+                                Modifier
+                                    .height(22.dp)
+                                    .padding(
+                                        end = 6.dp
+                                    ),
+                            strokeWidth = 2.dp,
+                            color = Color.White
+                        )
+
+                        Text(
+                            text =
+                                "CREANDO CUENTA..."
+                        )
+
+                    } else {
+
+                        Text(
+                            text =
+                                "CREAR CUENTA",
+                            modifier =
+                                Modifier.padding(
+                                    6.dp
+                                )
+                        )
+                    }
                 }
 
                 Spacer(
-                    modifier = Modifier.height(8.dp)
+                    modifier =
+                        Modifier.height(8.dp)
                 )
 
                 TextButton(
-                    onClick = onBackToLogin,
-                    modifier = Modifier.fillMaxWidth()
+                    onClick =
+                        onBackToLogin,
+                    enabled =
+                        !cargando,
+                    modifier =
+                        Modifier.fillMaxWidth()
                 ) {
 
                     Text(
@@ -384,7 +579,8 @@ fun RegisterScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
     }
 }
