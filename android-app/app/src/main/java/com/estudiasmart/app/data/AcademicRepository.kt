@@ -26,6 +26,9 @@ object AcademicRepository {
     private var materiasListener:
             ListenerRegistration? = null
 
+    private var temasListener:
+            ListenerRegistration? = null
+
     private var uidSincronizado:
             String? = null
 
@@ -38,7 +41,7 @@ object AcademicRepository {
 
     val materias: List<Materia>
         get() {
-            asegurarSincronizacionMaterias()
+            asegurarSincronizacionFirestore()
             return _materias
         }
 
@@ -47,7 +50,7 @@ object AcademicRepository {
 
     val temas: List<Tema>
         get() {
-            asegurarSincronizacionMaterias()
+            asegurarSincronizacionFirestore()
             return _temas
         }
 
@@ -56,7 +59,7 @@ object AcademicRepository {
 
     val materiales: List<Material>
         get() {
-            asegurarSincronizacionMaterias()
+            asegurarSincronizacionFirestore()
             return _materiales
         }
 
@@ -65,10 +68,10 @@ object AcademicRepository {
     private var siguienteMaterialId = 1
 
     // =========================================================
-    // SINCRONIZACIÓN DE MATERIAS CON FIRESTORE
+    // SINCRONIZACIÓN GENERAL
     // =========================================================
 
-    private fun asegurarSincronizacionMaterias() {
+    private fun asegurarSincronizacionFirestore() {
 
         val uidActual =
             auth.currentUser?.uid
@@ -84,24 +87,98 @@ object AcademicRepository {
 
         if (
             uidSincronizado == uidActual &&
-            materiasListener != null
+            materiasListener != null &&
+            temasListener != null
         ) {
             return
         }
 
-        materiasListener?.remove()
+        iniciarSincronizacionUsuario(
+            uidActual
+        )
+    }
 
-        uidSincronizado = uidActual
+    private fun iniciarSincronizacionUsuario(
+        uid: String
+    ) {
+
+        materiasListener?.remove()
+        temasListener?.remove()
+
+        materiasListener = null
+        temasListener = null
+
+        uidSincronizado = uid
+
+        crearOActualizarPerfilUsuario(uid)
 
         _materias.clear()
         _temas.clear()
         _materiales.clear()
 
+        siguienteMateriaId = 1
+        siguienteTemaId = 1
+        siguienteMaterialId = 1
+
+        escucharMaterias(uid)
+        escucharTemas(uid)
+    }
+
+    // =========================================================
+    // PERFIL DEL USUARIO EN FIRESTORE
+    // =========================================================
+
+    private fun crearOActualizarPerfilUsuario(
+        uid: String
+    ) {
+
+        val usuarioFirebase =
+            auth.currentUser ?: return
+
+        val datosUsuario =
+            hashMapOf<String, Any>(
+                "uid" to uid,
+                "correo" to (
+                        usuarioFirebase.email
+                            ?: ""
+                        ),
+                "nombre" to (
+                        usuarioFirebase.displayName
+                            ?: usuarioFirebase.email
+                                ?.substringBefore("@")
+                            ?: "Usuario"
+                        ),
+                "ultimoAcceso" to
+                        FieldValue.serverTimestamp()
+            )
+
+        firestore
+            .collection("usuarios")
+            .document(uid)
+            .set(
+                datosUsuario,
+                SetOptions.merge()
+            )
+            .addOnFailureListener { error ->
+
+                Log.e(
+                    "AcademicRepository",
+                    "Error creando perfil de usuario en Firestore",
+                    error
+                )
+            }
+    }
+
+    // =========================================================
+    // LISTENER MATERIAS
+    // =========================================================
+
+    private fun escucharMaterias(
+        uid: String
+    ) {
+
         materiasListener =
-            firestore
-                .collection("usuarios")
-                .document(uidActual)
-                .collection("materias")
+            referenciaMaterias(uid)
                 .orderBy("id")
                 .addSnapshotListener { snapshot, error ->
 
@@ -148,6 +225,7 @@ object AcademicRepository {
                         }
 
                     _materias.clear()
+
                     _materias.addAll(
                         materiasFirestore
                     )
@@ -163,6 +241,89 @@ object AcademicRepository {
                 }
     }
 
+    // =========================================================
+    // LISTENER TEMAS
+    // =========================================================
+
+    private fun escucharTemas(
+        uid: String
+    ) {
+
+        temasListener =
+            referenciaTemas(uid)
+                .orderBy("id")
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+
+                        Log.e(
+                            "AcademicRepository",
+                            "Error cargando temas desde Firestore",
+                            error
+                        )
+
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot == null) {
+                        return@addSnapshotListener
+                    }
+
+                    val temasFirestore =
+                        snapshot.documents.mapNotNull { documento ->
+
+                            val id =
+                                documento
+                                    .getLong("id")
+                                    ?.toInt()
+                                    ?: documento.id.toIntOrNull()
+                                    ?: return@mapNotNull null
+
+                            val materiaId =
+                                documento
+                                    .getLong("materiaId")
+                                    ?.toInt()
+                                    ?: return@mapNotNull null
+
+                            val nombre =
+                                documento
+                                    .getString("nombre")
+                                    ?: ""
+
+                            val descripcion =
+                                documento
+                                    .getString("descripcion")
+                                    ?: ""
+
+                            Tema(
+                                id = id,
+                                materiaId = materiaId,
+                                nombre = nombre,
+                                descripcion = descripcion
+                            )
+                        }
+
+                    _temas.clear()
+
+                    _temas.addAll(
+                        temasFirestore
+                    )
+
+                    siguienteTemaId =
+                        (
+                                _temas
+                                    .maxOfOrNull {
+                                        it.id
+                                    }
+                                    ?: 0
+                                ) + 1
+                }
+    }
+
+    // =========================================================
+    // REFERENCIAS FIRESTORE
+    // =========================================================
+
     private fun referenciaMaterias(
         uid: String
     ) =
@@ -170,6 +331,18 @@ object AcademicRepository {
             .collection("usuarios")
             .document(uid)
             .collection("materias")
+
+    private fun referenciaTemas(
+        uid: String
+    ) =
+        firestore
+            .collection("usuarios")
+            .document(uid)
+            .collection("temas")
+
+    // =========================================================
+    // GUARDAR MATERIA
+    // =========================================================
 
     private fun guardarMateriaFirestore(
         uid: String,
@@ -182,10 +355,12 @@ object AcademicRepository {
                 "id" to materia.id,
                 "nombre" to materia.nombre,
                 "descripcion" to materia.descripcion,
-                "actualizadoEn" to FieldValue.serverTimestamp()
+                "actualizadoEn" to
+                        FieldValue.serverTimestamp()
             )
 
         if (esNueva) {
+
             datos["creadoEn"] =
                 FieldValue.serverTimestamp()
         }
@@ -209,13 +384,60 @@ object AcademicRepository {
     }
 
     // =========================================================
-    // LIMPIEZA DE DATOS
+    // GUARDAR TEMA
+    // =========================================================
+
+    private fun guardarTemaFirestore(
+        uid: String,
+        tema: Tema,
+        esNuevo: Boolean
+    ) {
+
+        val datos =
+            hashMapOf<String, Any>(
+                "id" to tema.id,
+                "materiaId" to tema.materiaId,
+                "nombre" to tema.nombre,
+                "descripcion" to tema.descripcion,
+                "actualizadoEn" to
+                        FieldValue.serverTimestamp()
+            )
+
+        if (esNuevo) {
+
+            datos["creadoEn"] =
+                FieldValue.serverTimestamp()
+        }
+
+        referenciaTemas(uid)
+            .document(
+                tema.id.toString()
+            )
+            .set(
+                datos,
+                SetOptions.merge()
+            )
+            .addOnFailureListener { error ->
+
+                Log.e(
+                    "AcademicRepository",
+                    "Error guardando tema en Firestore",
+                    error
+                )
+            }
+    }
+
+    // =========================================================
+    // LIMPIEZA
     // =========================================================
 
     fun limpiarDatosLocales() {
 
         materiasListener?.remove()
+        temasListener?.remove()
+
         materiasListener = null
+        temasListener = null
 
         uidSincronizado = null
 
@@ -237,7 +459,7 @@ object AcademicRepository {
         descripcion: String
     ): String? {
 
-        asegurarSincronizacionMaterias()
+        asegurarSincronizacionFirestore()
 
         val uid =
             auth.currentUser?.uid
@@ -259,12 +481,14 @@ object AcademicRepository {
 
         if (
             _materias.any {
+
                 it.nombre.equals(
                     nombreLimpio,
                     ignoreCase = true
                 )
             }
         ) {
+
             return "Ya existe una materia con ese nombre."
         }
 
@@ -309,7 +533,7 @@ object AcademicRepository {
         descripcion: String
     ): String? {
 
-        asegurarSincronizacionMaterias()
+        asegurarSincronizacionFirestore()
 
         val uid =
             auth.currentUser?.uid
@@ -340,7 +564,9 @@ object AcademicRepository {
 
         val nombreDuplicado =
             _materias.any {
+
                 it.id != id &&
+
                         it.nombre.equals(
                             nombreLimpio,
                             ignoreCase = true
@@ -376,27 +602,45 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
-        asegurarSincronizacionMaterias()
+        asegurarSincronizacionFirestore()
 
         val uid =
             auth.currentUser?.uid
                 ?: return false
 
         val temasRelacionados =
-            _temas
-                .filter {
-                    it.materiaId == id
-                }
-                .map {
-                    it.id
-                }
+            _temas.filter {
+                it.materiaId == id
+            }
+
+        val idsTemasRelacionados =
+            temasRelacionados.map {
+                it.id
+            }
 
         _materiales.removeAll {
-            it.temaId in temasRelacionados
+            it.temaId in idsTemasRelacionados
         }
 
         _temas.removeAll {
             it.materiaId == id
+        }
+
+        temasRelacionados.forEach { tema ->
+
+            referenciaTemas(uid)
+                .document(
+                    tema.id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando tema relacionado de Firestore",
+                        error
+                    )
+                }
         }
 
         val eliminada =
@@ -428,7 +672,7 @@ object AcademicRepository {
         id: Int
     ): Materia? {
 
-        asegurarSincronizacionMaterias()
+        asegurarSincronizacionFirestore()
 
         return _materias.find {
             it.id == id
@@ -443,6 +687,8 @@ object AcademicRepository {
         materiaId: Int
     ): List<Tema> {
 
+        asegurarSincronizacionFirestore()
+
         return _temas.filter {
             it.materiaId == materiaId
         }
@@ -451,6 +697,8 @@ object AcademicRepository {
     fun obtenerTema(
         id: Int
     ): Tema? {
+
+        asegurarSincronizacionFirestore()
 
         return _temas.find {
             it.id == id
@@ -462,6 +710,12 @@ object AcademicRepository {
         nombre: String,
         descripcion: String
     ): String? {
+
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para crear un tema."
 
         val nombreLimpio =
             nombre.trim()
@@ -482,6 +736,7 @@ object AcademicRepository {
                 materiaId
             ) == null
         ) {
+
             return "La materia no existe."
         }
 
@@ -497,12 +752,28 @@ object AcademicRepository {
             }
 
         if (duplicado) {
+
             return "Ya existe un tema con ese nombre en esta materia."
         }
 
+        val nuevoId =
+            maxOf(
+                siguienteTemaId,
+                (
+                        _temas
+                            .maxOfOrNull {
+                                it.id
+                            }
+                            ?: 0
+                        ) + 1
+            )
+
+        siguienteTemaId =
+            nuevoId + 1
+
         val tema =
             Tema(
-                id = siguienteTemaId++,
+                id = nuevoId,
                 materiaId = materiaId,
                 nombre = nombreLimpio,
                 descripcion = descripcionLimpia
@@ -510,6 +781,12 @@ object AcademicRepository {
 
         _temas.add(
             tema
+        )
+
+        guardarTemaFirestore(
+            uid = uid,
+            tema = tema,
+            esNuevo = true
         )
 
         return null
@@ -520,6 +797,12 @@ object AcademicRepository {
         nombre: String,
         descripcion: String
     ): String? {
+
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para actualizar un tema."
 
         val nombreLimpio =
             nombre.trim()
@@ -563,11 +846,20 @@ object AcademicRepository {
             return "Ya existe otro tema con ese nombre."
         }
 
-        _temas[indice] =
+        val temaActualizado =
             temaActual.copy(
                 nombre = nombreLimpio,
                 descripcion = descripcionLimpia
             )
+
+        _temas[indice] =
+            temaActualizado
+
+        guardarTemaFirestore(
+            uid = uid,
+            tema = temaActualizado,
+            esNuevo = false
+        )
 
         return null
     }
@@ -576,17 +868,44 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return false
+
         _materiales.removeAll {
             it.temaId == id
         }
 
-        return _temas.removeAll {
-            it.id == id
+        val eliminado =
+            _temas.removeAll {
+                it.id == id
+            }
+
+        if (eliminado) {
+
+            referenciaTemas(uid)
+                .document(
+                    id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando tema de Firestore",
+                        error
+                    )
+                }
         }
+
+        return eliminado
     }
 
     // =========================
     // MATERIALES
+    // TODAVÍA LOCALES
     // =========================
 
     fun materialesPorTema(
@@ -627,6 +946,7 @@ object AcademicRepository {
                 temaId
             ) == null
         ) {
+
             return "El tema no existe."
         }
 
