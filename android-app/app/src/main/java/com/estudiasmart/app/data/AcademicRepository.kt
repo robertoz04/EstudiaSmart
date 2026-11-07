@@ -146,7 +146,8 @@ object AcademicRepository {
             hashMapOf<String, Any>(
                 "uid" to uid,
                 "correo" to (
-                        usuarioFirebase.email ?: ""
+                        usuarioFirebase.email
+                            ?: ""
                         ),
                 "nombre" to (
                         usuarioFirebase.displayName
@@ -556,7 +557,7 @@ object AcademicRepository {
     }
 
     // =========================================================
-    // LIMPIEZA
+    // LIMPIAR DATOS LOCALES
     // =========================================================
 
     fun limpiarDatosLocales() {
@@ -580,9 +581,9 @@ object AcademicRepository {
         siguienteMaterialId = 1
     }
 
-    // =========================
+    // =========================================================
     // MATERIAS
-    // =========================
+    // =========================================================
 
     fun crearMateria(
         nombre: String,
@@ -611,6 +612,7 @@ object AcademicRepository {
 
         if (
             _materias.any {
+
                 it.nombre.equals(
                     nombreLimpio,
                     ignoreCase = true
@@ -623,7 +625,11 @@ object AcademicRepository {
         val nuevoId =
             maxOf(
                 siguienteMateriaId,
-                (_materias.maxOfOrNull { it.id } ?: 0) + 1
+                (
+                        _materias.maxOfOrNull {
+                            it.id
+                        } ?: 0
+                        ) + 1
             )
 
         siguienteMateriaId =
@@ -636,7 +642,9 @@ object AcademicRepository {
                 descripcion = descripcionLimpia
             )
 
-        _materias.add(materia)
+        _materias.add(
+            materia
+        )
 
         guardarMateriaFirestore(
             uid = uid,
@@ -729,14 +737,18 @@ object AcademicRepository {
                 it.materiaId == id
             }
 
-        // =========================
-        // ELIMINAR FLASHCARDS
-        // DE LOS TEMAS RELACIONADOS
-        // =========================
+        // =====================================================
+        // ELIMINAR FLASHCARDS Y QUIZZES
+        // DE TODOS LOS TEMAS DE LA MATERIA
+        // =====================================================
 
         temasRelacionados.forEach { tema ->
 
             FlashcardRepository.eliminarPorTema(
+                tema.id
+            )
+
+            QuizRepository.eliminarPorTema(
                 tema.id
             )
         }
@@ -746,14 +758,14 @@ object AcademicRepository {
                 it.id
             }
 
+        // =====================================================
+        // ELIMINAR MATERIALES RELACIONADOS
+        // =====================================================
+
         val materialesRelacionados =
             _materiales.filter {
                 it.temaId in idsTemas
             }
-
-        // =========================
-        // ELIMINAR MATERIALES
-        // =========================
 
         materialesRelacionados.forEach { material ->
 
@@ -776,9 +788,9 @@ object AcademicRepository {
             it.temaId in idsTemas
         }
 
-        // =========================
+        // =====================================================
         // ELIMINAR TEMAS
-        // =========================
+        // =====================================================
 
         temasRelacionados.forEach { tema ->
 
@@ -801,9 +813,9 @@ object AcademicRepository {
             it.materiaId == id
         }
 
-        // =========================
+        // =====================================================
         // ELIMINAR MATERIA
-        // =========================
+        // =====================================================
 
         val eliminada =
             _materias.removeAll {
@@ -841,9 +853,9 @@ object AcademicRepository {
         }
     }
 
-    // =========================
+    // =========================================================
     // TEMAS
-    // =========================
+    // =========================================================
 
     fun temasPorMateria(
         materiaId: Int
@@ -918,7 +930,11 @@ object AcademicRepository {
         val nuevoId =
             maxOf(
                 siguienteTemaId,
-                (_temas.maxOfOrNull { it.id } ?: 0) + 1
+                (
+                        _temas.maxOfOrNull {
+                            it.id
+                        } ?: 0
+                        ) + 1
             )
 
         siguienteTemaId =
@@ -932,7 +948,9 @@ object AcademicRepository {
                 descripcion = descripcionLimpia
             )
 
-        _temas.add(tema)
+        _temas.add(
+            tema
+        )
 
         guardarTemaFirestore(
             uid = uid,
@@ -1024,19 +1042,25 @@ object AcademicRepository {
             auth.currentUser?.uid
                 ?: return false
 
-        // =========================
-        // ELIMINAR FLASHCARDS
-        // RELACIONADAS AL TEMA
-        // =========================
+        // =====================================================
+        // ELIMINAR FLASHCARDS RELACIONADAS
+        // =====================================================
 
         FlashcardRepository.eliminarPorTema(
             id
         )
 
-        // =========================
-        // ELIMINAR MATERIALES
-        // RELACIONADOS AL TEMA
-        // =========================
+        // =====================================================
+        // ELIMINAR QUIZZES E HISTORIAL RELACIONADO
+        // =====================================================
+
+        QuizRepository.eliminarPorTema(
+            id
+        )
+
+        // =====================================================
+        // ELIMINAR MATERIALES RELACIONADOS
+        // =====================================================
 
         val materialesRelacionados =
             _materiales.filter {
@@ -1064,9 +1088,9 @@ object AcademicRepository {
             it.temaId == id
         }
 
-        // =========================
+        // =====================================================
         // ELIMINAR TEMA
-        // =========================
+        // =====================================================
 
         val eliminado =
             _temas.removeAll {
@@ -1093,9 +1117,9 @@ object AcademicRepository {
         return eliminado
     }
 
-    // =========================
+    // =========================================================
     // MATERIALES
-    // =========================
+    // =========================================================
 
     fun materialesPorTema(
         temaId: Int
@@ -1163,7 +1187,11 @@ object AcademicRepository {
         val nuevoId =
             maxOf(
                 siguienteMaterialId,
-                (_materiales.maxOfOrNull { it.id } ?: 0) + 1
+                (
+                        _materiales.maxOfOrNull {
+                            it.id
+                        } ?: 0
+                        ) + 1
             )
 
         siguienteMaterialId =

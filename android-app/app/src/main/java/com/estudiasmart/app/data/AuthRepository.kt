@@ -301,7 +301,15 @@ object AuthRepository {
     // =========================================================
 
     fun cerrarSesion() {
+
+        AcademicRepository.limpiarDatosLocales()
+
+        FlashcardRepository.limpiarDatosLocales()
+
+        QuizRepository.limpiarDatosLocales()
+
         auth.signOut()
+
         usuarioActual = null
     }
 
