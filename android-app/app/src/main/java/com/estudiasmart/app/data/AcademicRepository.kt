@@ -729,6 +729,18 @@ object AcademicRepository {
                 it.materiaId == id
             }
 
+        // =========================
+        // ELIMINAR FLASHCARDS
+        // DE LOS TEMAS RELACIONADOS
+        // =========================
+
+        temasRelacionados.forEach { tema ->
+
+            FlashcardRepository.eliminarPorTema(
+                tema.id
+            )
+        }
+
         val idsTemas =
             temasRelacionados.map {
                 it.id
@@ -739,7 +751,10 @@ object AcademicRepository {
                 it.temaId in idsTemas
             }
 
-        // Eliminar materiales relacionados
+        // =========================
+        // ELIMINAR MATERIALES
+        // =========================
+
         materialesRelacionados.forEach { material ->
 
             referenciaMateriales(uid)
@@ -747,13 +762,24 @@ object AcademicRepository {
                     material.id.toString()
                 )
                 .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando material relacionado",
+                        error
+                    )
+                }
         }
 
         _materiales.removeAll {
             it.temaId in idsTemas
         }
 
-        // Eliminar temas relacionados
+        // =========================
+        // ELIMINAR TEMAS
+        // =========================
+
         temasRelacionados.forEach { tema ->
 
             referenciaTemas(uid)
@@ -761,11 +787,23 @@ object AcademicRepository {
                     tema.id.toString()
                 )
                 .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando tema relacionado",
+                        error
+                    )
+                }
         }
 
         _temas.removeAll {
             it.materiaId == id
         }
+
+        // =========================
+        // ELIMINAR MATERIA
+        // =========================
 
         val eliminada =
             _materias.removeAll {
@@ -779,6 +817,14 @@ object AcademicRepository {
                     id.toString()
                 )
                 .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando materia",
+                        error
+                    )
+                }
         }
 
         return eliminada
@@ -978,6 +1024,20 @@ object AcademicRepository {
             auth.currentUser?.uid
                 ?: return false
 
+        // =========================
+        // ELIMINAR FLASHCARDS
+        // RELACIONADAS AL TEMA
+        // =========================
+
+        FlashcardRepository.eliminarPorTema(
+            id
+        )
+
+        // =========================
+        // ELIMINAR MATERIALES
+        // RELACIONADOS AL TEMA
+        // =========================
+
         val materialesRelacionados =
             _materiales.filter {
                 it.temaId == id
@@ -990,11 +1050,23 @@ object AcademicRepository {
                     material.id.toString()
                 )
                 .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando material relacionado",
+                        error
+                    )
+                }
         }
 
         _materiales.removeAll {
             it.temaId == id
         }
+
+        // =========================
+        // ELIMINAR TEMA
+        // =========================
 
         val eliminado =
             _temas.removeAll {
@@ -1008,6 +1080,14 @@ object AcademicRepository {
                     id.toString()
                 )
                 .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando tema",
+                        error
+                    )
+                }
         }
 
         return eliminado
