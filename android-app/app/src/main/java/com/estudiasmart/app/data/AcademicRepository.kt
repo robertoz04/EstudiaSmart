@@ -1,45 +1,606 @@
 package com.estudiasmart.app.data
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import com.estudiasmart.app.model.Material
 import com.estudiasmart.app.model.Materia
 import com.estudiasmart.app.model.Tema
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 
 object AcademicRepository {
+
+    // =========================
+    // FIREBASE
+    // =========================
+
+    private val auth =
+        FirebaseAuth.getInstance()
+
+    private val firestore =
+        FirebaseFirestore.getInstance()
+
+    private var materiasListener:
+            ListenerRegistration? = null
+
+    private var temasListener:
+            ListenerRegistration? = null
+
+    private var materialesListener:
+            ListenerRegistration? = null
+
+    private var uidSincronizado:
+            String? = null
+
+    // =========================
+    // LISTAS LOCALES
+    // =========================
 
     private val _materias =
         mutableStateListOf<Materia>()
 
     val materias: List<Materia>
-        get() = _materias
+        get() {
+            asegurarSincronizacionFirestore()
+            return _materias
+        }
 
     private val _temas =
         mutableStateListOf<Tema>()
 
     val temas: List<Tema>
-        get() = _temas
+        get() {
+            asegurarSincronizacionFirestore()
+            return _temas
+        }
 
     private val _materiales =
         mutableStateListOf<Material>()
 
     val materiales: List<Material>
-        get() = _materiales
+        get() {
+            asegurarSincronizacionFirestore()
+            return _materiales
+        }
 
     private var siguienteMateriaId = 1
     private var siguienteTemaId = 1
     private var siguienteMaterialId = 1
 
-    // =========================
+    // =========================================================
+    // SINCRONIZACIÓN GENERAL
+    // =========================================================
+
+    private fun asegurarSincronizacionFirestore() {
+
+        val uidActual =
+            auth.currentUser?.uid
+
+        if (uidActual == null) {
+
+            if (uidSincronizado != null) {
+                limpiarDatosLocales()
+            }
+
+            return
+        }
+
+        if (
+            uidSincronizado == uidActual &&
+            materiasListener != null &&
+            temasListener != null &&
+            materialesListener != null
+        ) {
+            return
+        }
+
+        iniciarSincronizacionUsuario(
+            uidActual
+        )
+    }
+
+    private fun iniciarSincronizacionUsuario(
+        uid: String
+    ) {
+
+        materiasListener?.remove()
+        temasListener?.remove()
+        materialesListener?.remove()
+
+        materiasListener = null
+        temasListener = null
+        materialesListener = null
+
+        uidSincronizado = uid
+
+        crearOActualizarPerfilUsuario(uid)
+
+        _materias.clear()
+        _temas.clear()
+        _materiales.clear()
+
+        siguienteMateriaId = 1
+        siguienteTemaId = 1
+        siguienteMaterialId = 1
+
+        escucharMaterias(uid)
+        escucharTemas(uid)
+        escucharMateriales(uid)
+    }
+
+    // =========================================================
+    // PERFIL DEL USUARIO
+    // =========================================================
+
+    private fun crearOActualizarPerfilUsuario(
+        uid: String
+    ) {
+
+        val usuarioFirebase =
+            auth.currentUser ?: return
+
+        val datosUsuario =
+            hashMapOf<String, Any>(
+                "uid" to uid,
+                "correo" to (
+                        usuarioFirebase.email
+                            ?: ""
+                        ),
+                "nombre" to (
+                        usuarioFirebase.displayName
+                            ?: usuarioFirebase.email
+                                ?.substringBefore("@")
+                            ?: "Usuario"
+                        ),
+                "ultimoAcceso" to
+                        FieldValue.serverTimestamp()
+            )
+
+        firestore
+            .collection("usuarios")
+            .document(uid)
+            .set(
+                datosUsuario,
+                SetOptions.merge()
+            )
+            .addOnFailureListener { error ->
+
+                Log.e(
+                    "AcademicRepository",
+                    "Error creando perfil de usuario",
+                    error
+                )
+            }
+    }
+
+    // =========================================================
+    // LISTENER MATERIAS
+    // =========================================================
+
+    private fun escucharMaterias(
+        uid: String
+    ) {
+
+        materiasListener =
+            referenciaMaterias(uid)
+                .orderBy("id")
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+
+                        Log.e(
+                            "AcademicRepository",
+                            "Error cargando materias",
+                            error
+                        )
+
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot == null) {
+                        return@addSnapshotListener
+                    }
+
+                    val lista =
+                        snapshot.documents.mapNotNull { documento ->
+
+                            val id =
+                                documento
+                                    .getLong("id")
+                                    ?.toInt()
+                                    ?: documento.id.toIntOrNull()
+                                    ?: return@mapNotNull null
+
+                            val nombre =
+                                documento
+                                    .getString("nombre")
+                                    ?: ""
+
+                            val descripcion =
+                                documento
+                                    .getString("descripcion")
+                                    ?: ""
+
+                            Materia(
+                                id = id,
+                                nombre = nombre,
+                                descripcion = descripcion
+                            )
+                        }
+
+                    _materias.clear()
+                    _materias.addAll(lista)
+
+                    siguienteMateriaId =
+                        (
+                                _materias
+                                    .maxOfOrNull {
+                                        it.id
+                                    }
+                                    ?: 0
+                                ) + 1
+                }
+    }
+
+    // =========================================================
+    // LISTENER TEMAS
+    // =========================================================
+
+    private fun escucharTemas(
+        uid: String
+    ) {
+
+        temasListener =
+            referenciaTemas(uid)
+                .orderBy("id")
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+
+                        Log.e(
+                            "AcademicRepository",
+                            "Error cargando temas",
+                            error
+                        )
+
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot == null) {
+                        return@addSnapshotListener
+                    }
+
+                    val lista =
+                        snapshot.documents.mapNotNull { documento ->
+
+                            val id =
+                                documento
+                                    .getLong("id")
+                                    ?.toInt()
+                                    ?: documento.id.toIntOrNull()
+                                    ?: return@mapNotNull null
+
+                            val materiaId =
+                                documento
+                                    .getLong("materiaId")
+                                    ?.toInt()
+                                    ?: return@mapNotNull null
+
+                            val nombre =
+                                documento
+                                    .getString("nombre")
+                                    ?: ""
+
+                            val descripcion =
+                                documento
+                                    .getString("descripcion")
+                                    ?: ""
+
+                            Tema(
+                                id = id,
+                                materiaId = materiaId,
+                                nombre = nombre,
+                                descripcion = descripcion
+                            )
+                        }
+
+                    _temas.clear()
+                    _temas.addAll(lista)
+
+                    siguienteTemaId =
+                        (
+                                _temas
+                                    .maxOfOrNull {
+                                        it.id
+                                    }
+                                    ?: 0
+                                ) + 1
+                }
+    }
+
+    // =========================================================
+    // LISTENER MATERIALES
+    // =========================================================
+
+    private fun escucharMateriales(
+        uid: String
+    ) {
+
+        materialesListener =
+            referenciaMateriales(uid)
+                .orderBy("id")
+                .addSnapshotListener { snapshot, error ->
+
+                    if (error != null) {
+
+                        Log.e(
+                            "AcademicRepository",
+                            "Error cargando materiales",
+                            error
+                        )
+
+                        return@addSnapshotListener
+                    }
+
+                    if (snapshot == null) {
+                        return@addSnapshotListener
+                    }
+
+                    val lista =
+                        snapshot.documents.mapNotNull { documento ->
+
+                            val id =
+                                documento
+                                    .getLong("id")
+                                    ?.toInt()
+                                    ?: documento.id.toIntOrNull()
+                                    ?: return@mapNotNull null
+
+                            val temaId =
+                                documento
+                                    .getLong("temaId")
+                                    ?.toInt()
+                                    ?: return@mapNotNull null
+
+                            val titulo =
+                                documento
+                                    .getString("titulo")
+                                    ?: ""
+
+                            val contenido =
+                                documento
+                                    .getString("contenido")
+                                    ?: ""
+
+                            Material(
+                                id = id,
+                                temaId = temaId,
+                                titulo = titulo,
+                                contenido = contenido
+                            )
+                        }
+
+                    _materiales.clear()
+                    _materiales.addAll(lista)
+
+                    siguienteMaterialId =
+                        (
+                                _materiales
+                                    .maxOfOrNull {
+                                        it.id
+                                    }
+                                    ?: 0
+                                ) + 1
+                }
+    }
+
+    // =========================================================
+    // REFERENCIAS FIRESTORE
+    // =========================================================
+
+    private fun referenciaMaterias(
+        uid: String
+    ) =
+        firestore
+            .collection("usuarios")
+            .document(uid)
+            .collection("materias")
+
+    private fun referenciaTemas(
+        uid: String
+    ) =
+        firestore
+            .collection("usuarios")
+            .document(uid)
+            .collection("temas")
+
+    private fun referenciaMateriales(
+        uid: String
+    ) =
+        firestore
+            .collection("usuarios")
+            .document(uid)
+            .collection("materiales")
+
+    // =========================================================
+    // GUARDAR MATERIA
+    // =========================================================
+
+    private fun guardarMateriaFirestore(
+        uid: String,
+        materia: Materia,
+        esNueva: Boolean
+    ) {
+
+        val datos =
+            hashMapOf<String, Any>(
+                "id" to materia.id,
+                "nombre" to materia.nombre,
+                "descripcion" to materia.descripcion,
+                "actualizadoEn" to
+                        FieldValue.serverTimestamp()
+            )
+
+        if (esNueva) {
+
+            datos["creadoEn"] =
+                FieldValue.serverTimestamp()
+        }
+
+        referenciaMaterias(uid)
+            .document(
+                materia.id.toString()
+            )
+            .set(
+                datos,
+                SetOptions.merge()
+            )
+            .addOnFailureListener { error ->
+
+                Log.e(
+                    "AcademicRepository",
+                    "Error guardando materia",
+                    error
+                )
+            }
+    }
+
+    // =========================================================
+    // GUARDAR TEMA
+    // =========================================================
+
+    private fun guardarTemaFirestore(
+        uid: String,
+        tema: Tema,
+        esNuevo: Boolean
+    ) {
+
+        val datos =
+            hashMapOf<String, Any>(
+                "id" to tema.id,
+                "materiaId" to tema.materiaId,
+                "nombre" to tema.nombre,
+                "descripcion" to tema.descripcion,
+                "actualizadoEn" to
+                        FieldValue.serverTimestamp()
+            )
+
+        if (esNuevo) {
+
+            datos["creadoEn"] =
+                FieldValue.serverTimestamp()
+        }
+
+        referenciaTemas(uid)
+            .document(
+                tema.id.toString()
+            )
+            .set(
+                datos,
+                SetOptions.merge()
+            )
+            .addOnFailureListener { error ->
+
+                Log.e(
+                    "AcademicRepository",
+                    "Error guardando tema",
+                    error
+                )
+            }
+    }
+
+    // =========================================================
+    // GUARDAR MATERIAL
+    // =========================================================
+
+    private fun guardarMaterialFirestore(
+        uid: String,
+        material: Material,
+        esNuevo: Boolean
+    ) {
+
+        val datos =
+            hashMapOf<String, Any>(
+                "id" to material.id,
+                "temaId" to material.temaId,
+                "titulo" to material.titulo,
+                "contenido" to material.contenido,
+                "actualizadoEn" to
+                        FieldValue.serverTimestamp()
+            )
+
+        if (esNuevo) {
+
+            datos["creadoEn"] =
+                FieldValue.serverTimestamp()
+        }
+
+        referenciaMateriales(uid)
+            .document(
+                material.id.toString()
+            )
+            .set(
+                datos,
+                SetOptions.merge()
+            )
+            .addOnFailureListener { error ->
+
+                Log.e(
+                    "AcademicRepository",
+                    "Error guardando material",
+                    error
+                )
+            }
+    }
+
+    // =========================================================
+    // LIMPIAR DATOS LOCALES
+    // =========================================================
+
+    fun limpiarDatosLocales() {
+
+        materiasListener?.remove()
+        temasListener?.remove()
+        materialesListener?.remove()
+
+        materiasListener = null
+        temasListener = null
+        materialesListener = null
+
+        uidSincronizado = null
+
+        _materias.clear()
+        _temas.clear()
+        _materiales.clear()
+
+        siguienteMateriaId = 1
+        siguienteTemaId = 1
+        siguienteMaterialId = 1
+    }
+
+    // =========================================================
     // MATERIAS
-    // =========================
+    // =========================================================
 
     fun crearMateria(
         nombre: String,
         descripcion: String
     ): String? {
 
-        val nombreLimpio = nombre.trim()
-        val descripcionLimpia = descripcion.trim()
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para crear una materia."
+
+        val nombreLimpio =
+            nombre.trim()
+
+        val descripcionLimpia =
+            descripcion.trim()
 
         if (nombreLimpio.isBlank()) {
             return "El nombre de la materia es obligatorio."
@@ -51,6 +612,7 @@ object AcademicRepository {
 
         if (
             _materias.any {
+
                 it.nombre.equals(
                     nombreLimpio,
                     ignoreCase = true
@@ -60,13 +622,35 @@ object AcademicRepository {
             return "Ya existe una materia con ese nombre."
         }
 
-        val materia = Materia(
-            id = siguienteMateriaId++,
-            nombre = nombreLimpio,
-            descripcion = descripcionLimpia
+        val nuevoId =
+            maxOf(
+                siguienteMateriaId,
+                (
+                        _materias.maxOfOrNull {
+                            it.id
+                        } ?: 0
+                        ) + 1
+            )
+
+        siguienteMateriaId =
+            nuevoId + 1
+
+        val materia =
+            Materia(
+                id = nuevoId,
+                nombre = nombreLimpio,
+                descripcion = descripcionLimpia
+            )
+
+        _materias.add(
+            materia
         )
 
-        _materias.add(materia)
+        guardarMateriaFirestore(
+            uid = uid,
+            materia = materia,
+            esNueva = true
+        )
 
         return null
     }
@@ -77,8 +661,17 @@ object AcademicRepository {
         descripcion: String
     ): String? {
 
-        val nombreLimpio = nombre.trim()
-        val descripcionLimpia = descripcion.trim()
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para actualizar una materia."
+
+        val nombreLimpio =
+            nombre.trim()
+
+        val descripcionLimpia =
+            descripcion.trim()
 
         if (nombreLimpio.isBlank()) {
             return "El nombre no puede estar vacío."
@@ -97,8 +690,9 @@ object AcademicRepository {
             return "Materia no encontrada."
         }
 
-        val nombreDuplicado =
+        val duplicado =
             _materias.any {
+
                 it.id != id &&
                         it.nombre.equals(
                             nombreLimpio,
@@ -106,18 +700,24 @@ object AcademicRepository {
                         )
             }
 
-        if (nombreDuplicado) {
+        if (duplicado) {
             return "Ya existe otra materia con ese nombre."
         }
 
-        val materiaActual =
-            _materias[indice]
-
-        _materias[indice] =
-            materiaActual.copy(
+        val materia =
+            _materias[indice].copy(
                 nombre = nombreLimpio,
                 descripcion = descripcionLimpia
             )
+
+        _materias[indice] =
+            materia
+
+        guardarMateriaFirestore(
+            uid = uid,
+            materia = materia,
+            esNueva = false
+        )
 
         return null
     }
@@ -126,42 +726,142 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return false
+
         val temasRelacionados =
             _temas.filter {
                 it.materiaId == id
-            }.map {
+            }
+
+        // =====================================================
+        // ELIMINAR FLASHCARDS Y QUIZZES
+        // DE TODOS LOS TEMAS DE LA MATERIA
+        // =====================================================
+
+        temasRelacionados.forEach { tema ->
+
+            FlashcardRepository.eliminarPorTema(
+                tema.id
+            )
+
+            QuizRepository.eliminarPorTema(
+                tema.id
+            )
+        }
+
+        val idsTemas =
+            temasRelacionados.map {
                 it.id
             }
 
+        // =====================================================
+        // ELIMINAR MATERIALES RELACIONADOS
+        // =====================================================
+
+        val materialesRelacionados =
+            _materiales.filter {
+                it.temaId in idsTemas
+            }
+
+        materialesRelacionados.forEach { material ->
+
+            referenciaMateriales(uid)
+                .document(
+                    material.id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando material relacionado",
+                        error
+                    )
+                }
+        }
+
         _materiales.removeAll {
-            it.temaId in temasRelacionados
+            it.temaId in idsTemas
+        }
+
+        // =====================================================
+        // ELIMINAR TEMAS
+        // =====================================================
+
+        temasRelacionados.forEach { tema ->
+
+            referenciaTemas(uid)
+                .document(
+                    tema.id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando tema relacionado",
+                        error
+                    )
+                }
         }
 
         _temas.removeAll {
             it.materiaId == id
         }
 
-        return _materias.removeAll {
-            it.id == id
+        // =====================================================
+        // ELIMINAR MATERIA
+        // =====================================================
+
+        val eliminada =
+            _materias.removeAll {
+                it.id == id
+            }
+
+        if (eliminada) {
+
+            referenciaMaterias(uid)
+                .document(
+                    id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando materia",
+                        error
+                    )
+                }
         }
+
+        return eliminada
     }
 
     fun obtenerMateria(
         id: Int
     ): Materia? {
 
+        asegurarSincronizacionFirestore()
+
         return _materias.find {
             it.id == id
         }
     }
 
-    // =========================
+    // =========================================================
     // TEMAS
-    // =========================
+    // =========================================================
 
     fun temasPorMateria(
         materiaId: Int
     ): List<Tema> {
+
+        asegurarSincronizacionFirestore()
 
         return _temas.filter {
             it.materiaId == materiaId
@@ -171,6 +871,8 @@ object AcademicRepository {
     fun obtenerTema(
         id: Int
     ): Tema? {
+
+        asegurarSincronizacionFirestore()
 
         return _temas.find {
             it.id == id
@@ -183,8 +885,17 @@ object AcademicRepository {
         descripcion: String
     ): String? {
 
-        val nombreLimpio = nombre.trim()
-        val descripcionLimpia = descripcion.trim()
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para crear un tema."
+
+        val nombreLimpio =
+            nombre.trim()
+
+        val descripcionLimpia =
+            descripcion.trim()
 
         if (nombreLimpio.isBlank()) {
             return "El nombre del tema es obligatorio."
@@ -194,12 +905,17 @@ object AcademicRepository {
             return "El nombre debe tener al menos 3 caracteres."
         }
 
-        if (obtenerMateria(materiaId) == null) {
+        if (
+            obtenerMateria(
+                materiaId
+            ) == null
+        ) {
             return "La materia no existe."
         }
 
         val duplicado =
             _temas.any {
+
                 it.materiaId == materiaId &&
                         it.nombre.equals(
                             nombreLimpio,
@@ -211,14 +927,36 @@ object AcademicRepository {
             return "Ya existe un tema con ese nombre en esta materia."
         }
 
-        val tema = Tema(
-            id = siguienteTemaId++,
-            materiaId = materiaId,
-            nombre = nombreLimpio,
-            descripcion = descripcionLimpia
+        val nuevoId =
+            maxOf(
+                siguienteTemaId,
+                (
+                        _temas.maxOfOrNull {
+                            it.id
+                        } ?: 0
+                        ) + 1
+            )
+
+        siguienteTemaId =
+            nuevoId + 1
+
+        val tema =
+            Tema(
+                id = nuevoId,
+                materiaId = materiaId,
+                nombre = nombreLimpio,
+                descripcion = descripcionLimpia
+            )
+
+        _temas.add(
+            tema
         )
 
-        _temas.add(tema)
+        guardarTemaFirestore(
+            uid = uid,
+            tema = tema,
+            esNuevo = true
+        )
 
         return null
     }
@@ -229,8 +967,17 @@ object AcademicRepository {
         descripcion: String
     ): String? {
 
-        val nombreLimpio = nombre.trim()
-        val descripcionLimpia = descripcion.trim()
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para actualizar un tema."
+
+        val nombreLimpio =
+            nombre.trim()
+
+        val descripcionLimpia =
+            descripcion.trim()
 
         if (nombreLimpio.isBlank()) {
             return "El nombre del tema es obligatorio."
@@ -254,6 +1001,7 @@ object AcademicRepository {
 
         val duplicado =
             _temas.any {
+
                 it.id != id &&
                         it.materiaId == temaActual.materiaId &&
                         it.nombre.equals(
@@ -266,11 +1014,20 @@ object AcademicRepository {
             return "Ya existe otro tema con ese nombre."
         }
 
-        _temas[indice] =
+        val tema =
             temaActual.copy(
                 nombre = nombreLimpio,
                 descripcion = descripcionLimpia
             )
+
+        _temas[indice] =
+            tema
+
+        guardarTemaFirestore(
+            uid = uid,
+            tema = tema,
+            esNuevo = false
+        )
 
         return null
     }
@@ -279,22 +1036,96 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return false
+
+        // =====================================================
+        // ELIMINAR FLASHCARDS RELACIONADAS
+        // =====================================================
+
+        FlashcardRepository.eliminarPorTema(
+            id
+        )
+
+        // =====================================================
+        // ELIMINAR QUIZZES E HISTORIAL RELACIONADO
+        // =====================================================
+
+        QuizRepository.eliminarPorTema(
+            id
+        )
+
+        // =====================================================
+        // ELIMINAR MATERIALES RELACIONADOS
+        // =====================================================
+
+        val materialesRelacionados =
+            _materiales.filter {
+                it.temaId == id
+            }
+
+        materialesRelacionados.forEach { material ->
+
+            referenciaMateriales(uid)
+                .document(
+                    material.id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando material relacionado",
+                        error
+                    )
+                }
+        }
+
         _materiales.removeAll {
             it.temaId == id
         }
 
-        return _temas.removeAll {
-            it.id == id
+        // =====================================================
+        // ELIMINAR TEMA
+        // =====================================================
+
+        val eliminado =
+            _temas.removeAll {
+                it.id == id
+            }
+
+        if (eliminado) {
+
+            referenciaTemas(uid)
+                .document(
+                    id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando tema",
+                        error
+                    )
+                }
         }
+
+        return eliminado
     }
 
-    // =========================
+    // =========================================================
     // MATERIALES
-    // =========================
+    // =========================================================
 
     fun materialesPorTema(
         temaId: Int
     ): List<Material> {
+
+        asegurarSincronizacionFirestore()
 
         return _materiales.filter {
             it.temaId == temaId
@@ -307,8 +1138,17 @@ object AcademicRepository {
         contenido: String
     ): String? {
 
-        val tituloLimpio = titulo.trim()
-        val contenidoLimpio = contenido.trim()
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para crear un material."
+
+        val tituloLimpio =
+            titulo.trim()
+
+        val contenidoLimpio =
+            contenido.trim()
 
         if (tituloLimpio.isBlank()) {
             return "El título del material es obligatorio."
@@ -322,12 +1162,17 @@ object AcademicRepository {
             return "El contenido del material es obligatorio."
         }
 
-        if (obtenerTema(temaId) == null) {
+        if (
+            obtenerTema(
+                temaId
+            ) == null
+        ) {
             return "El tema no existe."
         }
 
         val duplicado =
             _materiales.any {
+
                 it.temaId == temaId &&
                         it.titulo.equals(
                             tituloLimpio,
@@ -339,14 +1184,36 @@ object AcademicRepository {
             return "Ya existe un material con ese título."
         }
 
-        val material = Material(
-            id = siguienteMaterialId++,
-            temaId = temaId,
-            titulo = tituloLimpio,
-            contenido = contenidoLimpio
+        val nuevoId =
+            maxOf(
+                siguienteMaterialId,
+                (
+                        _materiales.maxOfOrNull {
+                            it.id
+                        } ?: 0
+                        ) + 1
+            )
+
+        siguienteMaterialId =
+            nuevoId + 1
+
+        val material =
+            Material(
+                id = nuevoId,
+                temaId = temaId,
+                titulo = tituloLimpio,
+                contenido = contenidoLimpio
+            )
+
+        _materiales.add(
+            material
         )
 
-        _materiales.add(material)
+        guardarMaterialFirestore(
+            uid = uid,
+            material = material,
+            esNuevo = true
+        )
 
         return null
     }
@@ -357,8 +1224,17 @@ object AcademicRepository {
         contenido: String
     ): String? {
 
-        val tituloLimpio = titulo.trim()
-        val contenidoLimpio = contenido.trim()
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return "Debes iniciar sesión para actualizar un material."
+
+        val tituloLimpio =
+            titulo.trim()
+
+        val contenidoLimpio =
+            contenido.trim()
 
         if (tituloLimpio.isBlank()) {
             return "El título del material es obligatorio."
@@ -386,6 +1262,7 @@ object AcademicRepository {
 
         val duplicado =
             _materiales.any {
+
                 it.id != id &&
                         it.temaId == materialActual.temaId &&
                         it.titulo.equals(
@@ -398,11 +1275,20 @@ object AcademicRepository {
             return "Ya existe otro material con ese título."
         }
 
-        _materiales[indice] =
+        val material =
             materialActual.copy(
                 titulo = tituloLimpio,
                 contenido = contenidoLimpio
             )
+
+        _materiales[indice] =
+            material
+
+        guardarMaterialFirestore(
+            uid = uid,
+            material = material,
+            esNuevo = false
+        )
 
         return null
     }
@@ -411,8 +1297,34 @@ object AcademicRepository {
         id: Int
     ): Boolean {
 
-        return _materiales.removeAll {
-            it.id == id
+        asegurarSincronizacionFirestore()
+
+        val uid =
+            auth.currentUser?.uid
+                ?: return false
+
+        val eliminado =
+            _materiales.removeAll {
+                it.id == id
+            }
+
+        if (eliminado) {
+
+            referenciaMateriales(uid)
+                .document(
+                    id.toString()
+                )
+                .delete()
+                .addOnFailureListener { error ->
+
+                    Log.e(
+                        "AcademicRepository",
+                        "Error eliminando material",
+                        error
+                    )
+                }
         }
+
+        return eliminado
     }
 }
