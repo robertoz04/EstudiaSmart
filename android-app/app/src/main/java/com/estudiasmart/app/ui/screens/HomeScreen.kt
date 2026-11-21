@@ -24,11 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AcademicRepository
-import com.estudiasmart.app.data.AuthRepository
-import com.estudiasmart.app.data.FlashcardRepository
-import com.estudiasmart.app.data.ProgresoService
-import com.estudiasmart.app.data.QuizRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.estudiasmart.app.viewmodel.HomeViewModel
 import java.util.Locale
 
 @Composable
@@ -38,7 +35,8 @@ fun HomeScreen(
     onQuizClick: () -> Unit,
     onProgresoClick: () -> Unit,
     onRecomendacionesClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    viewModel: HomeViewModel = viewModel()
 ) {
 
     val colorPrincipal =
@@ -47,12 +45,23 @@ fun HomeScreen(
     val fondo =
         Color(0xFFF6F7FB)
 
-    val usuario =
-        AuthRepository.usuarioActual
+    val nombreUsuario =
+        viewModel.nombreUsuario
+
+    val totalMaterias =
+        viewModel.totalMaterias
+
+    val totalTemas =
+        viewModel.totalTemas
+
+    val totalFlashcards =
+        viewModel.totalFlashcards
+
+    val totalQuizzes =
+        viewModel.totalQuizzes
 
     val progresoGeneral =
-        ProgresoService
-            .calcularPromedioGeneral()
+        viewModel.progresoGeneral
 
     LazyColumn(
         modifier = Modifier
@@ -68,7 +77,8 @@ fun HomeScreen(
         item {
 
             Spacer(
-                modifier = Modifier.height(18.dp)
+                modifier =
+                    Modifier.height(18.dp)
             )
 
             Row(
@@ -83,8 +93,10 @@ fun HomeScreen(
                 Text(
                     text = "EstudiaSmart",
                     fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorPrincipal
+                    fontWeight =
+                        FontWeight.Bold,
+                    color =
+                        colorPrincipal
                 )
 
                 TextButton(
@@ -98,24 +110,28 @@ fun HomeScreen(
             }
 
             Spacer(
-                modifier = Modifier.height(4.dp)
+                modifier =
+                    Modifier.height(4.dp)
             )
 
             Text(
                 text =
-                    "Hola, ${usuario?.nombre ?: "Estudiante"} 👋",
+                    "Hola, $nombreUsuario 👋",
                 fontSize = 21.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight =
+                    FontWeight.SemiBold
             )
 
             Text(
                 text =
                     "¿Qué quieres estudiar hoy?",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier =
+                    Modifier.height(12.dp)
             )
         }
 
@@ -131,10 +147,7 @@ fun HomeScreen(
                 ResumenCard(
                     titulo = "Materias",
                     valor =
-                        AcademicRepository
-                            .materias
-                            .size
-                            .toString(),
+                        totalMaterias.toString(),
                     modifier =
                         Modifier.weight(1f)
                 )
@@ -142,10 +155,7 @@ fun HomeScreen(
                 ResumenCard(
                     titulo = "Temas",
                     valor =
-                        AcademicRepository
-                            .temas
-                            .size
-                            .toString(),
+                        totalTemas.toString(),
                     modifier =
                         Modifier.weight(1f)
                 )
@@ -164,10 +174,7 @@ fun HomeScreen(
                 ResumenCard(
                     titulo = "Flashcards",
                     valor =
-                        FlashcardRepository
-                            .flashcards
-                            .size
-                            .toString(),
+                        totalFlashcards.toString(),
                     modifier =
                         Modifier.weight(1f)
                 )
@@ -175,10 +182,7 @@ fun HomeScreen(
                 ResumenCard(
                     titulo = "Quiz",
                     valor =
-                        QuizRepository
-                            .quizzes
-                            .size
-                            .toString(),
+                        totalQuizzes.toString(),
                     modifier =
                         Modifier.weight(1f)
                 )
@@ -213,8 +217,10 @@ fun HomeScreen(
                     Column {
 
                         Text(
-                            text = "Progreso general",
-                            color = Color.Gray
+                            text =
+                                "Progreso general",
+                            color =
+                                Color.Gray
                         )
 
                         Text(
@@ -226,7 +232,8 @@ fun HomeScreen(
                                         progresoGeneral
                                     )
                                 }%",
-                            fontSize = 28.sp,
+                            fontSize =
+                                28.sp,
                             fontWeight =
                                 FontWeight.Bold,
                             color =
@@ -235,7 +242,8 @@ fun HomeScreen(
                     }
 
                     Button(
-                        onClick = onProgresoClick,
+                        onClick =
+                            onProgresoClick,
                         colors =
                             ButtonDefaults
                                 .buttonColors(
@@ -244,7 +252,10 @@ fun HomeScreen(
                                 )
                     ) {
 
-                        Text("VER PROGRESO")
+                        Text(
+                            text =
+                                "VER PROGRESO"
+                        )
                     }
                 }
             }
@@ -267,13 +278,15 @@ fun HomeScreen(
         item {
 
             Spacer(
-                modifier = Modifier.height(6.dp)
+                modifier =
+                    Modifier.height(6.dp)
             )
 
             Text(
                 text =
                     "Tus herramientas de estudio",
-                fontSize = 20.sp,
+                fontSize =
+                    20.sp,
                 fontWeight =
                     FontWeight.Bold
             )
@@ -338,7 +351,8 @@ fun HomeScreen(
         item {
 
             Spacer(
-                modifier = Modifier.height(30.dp)
+                modifier =
+                    Modifier.height(30.dp)
             )
         }
     }
@@ -372,20 +386,24 @@ private fun ToolCard(
             Text(
                 text = titulo,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight =
+                    FontWeight.Bold
             )
 
             Spacer(
-                modifier = Modifier.height(4.dp)
+                modifier =
+                    Modifier.height(4.dp)
             )
 
             Text(
                 text = descripcion,
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier =
+                    Modifier.height(12.dp)
             )
 
             Button(
@@ -393,13 +411,16 @@ private fun ToolCard(
                 modifier =
                     Modifier.fillMaxWidth(),
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            Color(0xFF4F46E5)
-                    )
+                    ButtonDefaults
+                        .buttonColors(
+                            containerColor =
+                                Color(0xFF4F46E5)
+                        )
             ) {
 
-                Text(boton)
+                Text(
+                    text = boton
+                )
             }
         }
     }
@@ -423,7 +444,8 @@ private fun ResumenCard(
             ),
         elevation =
             CardDefaults.cardElevation(
-                defaultElevation = 2.dp
+                defaultElevation =
+                    2.dp
             )
     ) {
 
@@ -435,7 +457,8 @@ private fun ResumenCard(
             Text(
                 text = valor,
                 fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight =
+                    FontWeight.Bold,
                 color =
                     Color(0xFF4F46E5)
             )
@@ -443,7 +466,8 @@ private fun ResumenCard(
             Text(
                 text = titulo,
                 fontSize = 14.sp,
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
         }
     }

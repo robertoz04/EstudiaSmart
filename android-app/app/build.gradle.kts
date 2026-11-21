@@ -92,6 +92,10 @@ dependencies {
         libs.androidx.lifecycle.runtime.ktx
     )
 
+    implementation(
+        "androidx.lifecycle:lifecycle-viewmodel-compose:2.11.1"
+    )
+
     // =========================
     // NAVEGACIÓN
     // =========================
