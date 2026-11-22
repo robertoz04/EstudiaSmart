@@ -35,103 +35,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AcademicRepository
-import com.estudiasmart.app.data.QuizRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.estudiasmart.app.model.Quiz
 import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
+import com.estudiasmart.app.viewmodel.QuizViewModel
 import java.util.Locale
 
 @Composable
 fun QuizScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    quizViewModel: QuizViewModel =
+        viewModel()
 ) {
 
     val temas =
-        AcademicRepository.temas
+        quizViewModel.temas
+
+    val quizzes =
+        quizViewModel.quizzes
+
+    val quizAdministrando =
+        quizViewModel.quizAdministrando
+
+    val quizResolviendo =
+        quizViewModel.quizResolviendo
+
+    var menuTemasAbierto by remember {
+        mutableStateOf(false)
+    }
 
     val colorPrincipal =
         Color(0xFF4F46E5)
 
     val fondo =
         Color(0xFFF6F7FB)
-
-    var tituloQuiz by remember {
-        mutableStateOf("")
-    }
-
-    var temaSeleccionadoId by remember {
-        mutableStateOf<Int?>(
-            temas.firstOrNull()?.id
-        )
-    }
-
-    var menuTemasAbierto by remember {
-        mutableStateOf(false)
-    }
-
-    var errorQuiz by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var quizAdministrandoId by remember {
-        mutableStateOf<Int?>(null)
-    }
-
-    var quizResolviendoId by remember {
-        mutableStateOf<Int?>(null)
-    }
-
-    var quizAEliminar by remember {
-        mutableStateOf<Quiz?>(null)
-    }
-
-    var enunciado by remember {
-        mutableStateOf("")
-    }
-
-    var opcion1 by remember {
-        mutableStateOf("")
-    }
-
-    var opcion2 by remember {
-        mutableStateOf("")
-    }
-
-    var opcion3 by remember {
-        mutableStateOf("")
-    }
-
-    var opcion4 by remember {
-        mutableStateOf("")
-    }
-
-    var respuestaCorrecta by remember {
-        mutableStateOf<Int?>(null)
-    }
-
-    var errorPregunta by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var respuestasUsuario by remember {
-        mutableStateOf<Map<Int, Int>>(
-            emptyMap()
-        )
-    }
-
-    var resultadoTexto by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    val quizAdministrando =
-        quizAdministrandoId?.let {
-            QuizRepository.obtenerQuiz(it)
-        }
-
-    val quizResolviendo =
-        quizResolviendoId?.let {
-            QuizRepository.obtenerQuiz(it)
-        }
 
     LazyColumn(
         modifier = Modifier
@@ -147,30 +84,38 @@ fun QuizScreen(
         item {
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier =
+                    Modifier.height(12.dp)
             )
 
             TextButton(
                 onClick = onBack
             ) {
-                Text("← Volver al inicio")
+
+                Text(
+                    "← Volver al inicio"
+                )
             }
 
             Text(
                 text = "Quiz",
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorPrincipal
+                fontWeight =
+                    FontWeight.Bold,
+                color =
+                    colorPrincipal
             )
 
             Text(
                 text =
                     "Evalúa tus conocimientos y revisa tu progreso.",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier =
+                    Modifier.height(16.dp)
             )
         }
 
@@ -196,7 +141,8 @@ fun QuizScreen(
                         Text(
                             text =
                                 "Primero debes crear una materia y al menos un tema.",
-                            color = Color.Gray
+                            color =
+                                Color.Gray
                         )
                     }
                 }
@@ -204,13 +150,19 @@ fun QuizScreen(
 
         } else {
 
+            // =================================================
+            // CREAR QUIZ
+            // =================================================
+
             item {
 
                 Card(
                     modifier =
                         Modifier.fillMaxWidth(),
                     shape =
-                        RoundedCornerShape(20.dp),
+                        RoundedCornerShape(
+                            20.dp
+                        ),
                     colors =
                         CardDefaults.cardColors(
                             containerColor =
@@ -229,7 +181,8 @@ fun QuizScreen(
                     ) {
 
                         Text(
-                            text = "Nuevo Quiz",
+                            text =
+                                "Nuevo Quiz",
                             fontSize = 20.sp,
                             fontWeight =
                                 FontWeight.Bold
@@ -237,7 +190,9 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(14.dp)
+                                Modifier.height(
+                                    14.dp
+                                )
                         )
 
                         Text(
@@ -248,7 +203,9 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(6.dp)
+                                Modifier.height(
+                                    6.dp
+                                )
                         )
 
                         Box(
@@ -258,17 +215,21 @@ fun QuizScreen(
 
                             OutlinedButton(
                                 onClick = {
+
                                     menuTemasAbierto =
                                         true
                                 },
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier
+                                        .fillMaxWidth()
                             ) {
 
                                 val tema =
                                     temas.find {
+
                                         it.id ==
-                                                temaSeleccionadoId
+                                                quizViewModel
+                                                    .temaSeleccionadoId
                                     }
 
                                 Text(
@@ -282,6 +243,7 @@ fun QuizScreen(
                                 expanded =
                                     menuTemasAbierto,
                                 onDismissRequest = {
+
                                     menuTemasAbierto =
                                         false
                                 }
@@ -291,20 +253,20 @@ fun QuizScreen(
 
                                     DropdownMenuItem(
                                         text = {
+
                                             Text(
                                                 tema.nombre
                                             )
                                         },
                                         onClick = {
 
-                                            temaSeleccionadoId =
-                                                tema.id
+                                            quizViewModel
+                                                .seleccionarTema(
+                                                    tema.id
+                                                )
 
                                             menuTemasAbierto =
                                                 false
-
-                                            errorQuiz =
-                                                null
                                         }
                                     )
                                 }
@@ -313,88 +275,76 @@ fun QuizScreen(
 
                         Spacer(
                             modifier =
-                                Modifier.height(12.dp)
+                                Modifier.height(
+                                    12.dp
+                                )
                         )
 
                         OutlinedTextField(
                             value =
-                                tituloQuiz,
+                                quizViewModel
+                                    .tituloQuiz,
                             onValueChange = {
-                                tituloQuiz = it
-                                errorQuiz = null
+
+                                quizViewModel
+                                    .cambiarTituloQuiz(
+                                        it
+                                    )
                             },
                             label = {
+
                                 Text(
                                     "Título del Quiz"
                                 )
                             },
                             placeholder = {
+
                                 Text(
                                     "Ej. Evaluación de Compose"
                                 )
                             },
                             singleLine = true,
                             modifier =
-                                Modifier.fillMaxWidth()
+                                Modifier
+                                    .fillMaxWidth()
                         )
 
-                        if (errorQuiz != null) {
+                        quizViewModel
+                            .errorQuiz
+                            ?.let {
 
-                            Spacer(
-                                modifier =
-                                    Modifier.height(8.dp)
-                            )
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(
+                                            8.dp
+                                        )
+                                )
 
-                            Text(
-                                text = errorQuiz!!,
-                                color =
-                                    MaterialTheme
-                                        .colorScheme
-                                        .error
-                            )
-                        }
+                                Text(
+                                    text = it,
+                                    color =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .error
+                                )
+                            }
 
                         Spacer(
                             modifier =
-                                Modifier.height(14.dp)
+                                Modifier.height(
+                                    14.dp
+                                )
                         )
 
                         Button(
                             onClick = {
 
-                                val temaId =
-                                    temaSeleccionadoId
-
-                                if (temaId == null) {
-
-                                    errorQuiz =
-                                        "Selecciona un tema."
-
-                                    return@Button
-                                }
-
-                                val resultado =
-                                    QuizRepository
-                                        .crearQuiz(
-                                            temaId =
-                                                temaId,
-                                            titulo =
-                                                tituloQuiz
-                                        )
-
-                                if (resultado == null) {
-
-                                    tituloQuiz = ""
-                                    errorQuiz = null
-
-                                } else {
-
-                                    errorQuiz =
-                                        resultado
-                                }
+                                quizViewModel
+                                    .crearQuiz()
                             },
                             modifier =
-                                Modifier.fillMaxWidth(),
+                                Modifier
+                                    .fillMaxWidth(),
                             colors =
                                 ButtonDefaults
                                     .buttonColors(
@@ -403,49 +353,53 @@ fun QuizScreen(
                                     )
                         ) {
 
-                            Text("CREAR QUIZ")
+                            Text(
+                                "CREAR QUIZ"
+                            )
                         }
                     }
                 }
             }
+
+            // =================================================
+            // LISTA QUIZZES
+            // =================================================
 
             item {
 
                 Text(
                     text =
                         "Quizzes registrados",
-                    fontSize = 20.sp,
+                    fontSize =
+                        20.sp,
                     fontWeight =
                         FontWeight.Bold
                 )
 
                 Text(
                     text =
-                        "${QuizRepository.quizzes.size} quizzes en total",
-                    color = Color.Gray
+                        "${quizzes.size} quizzes en total",
+                    color =
+                        Color.Gray
                 )
             }
 
-            if (
-                QuizRepository
-                    .quizzes
-                    .isEmpty()
-            ) {
+            if (quizzes.isEmpty()) {
 
                 item {
 
                     Text(
                         text =
                             "Todavía no tienes quizzes.",
-                        color = Color.Gray
+                        color =
+                            Color.Gray
                     )
                 }
 
             } else {
 
                 items(
-                    items =
-                        QuizRepository.quizzes,
+                    items = quizzes,
                     key = {
                         it.id
                     }
@@ -453,48 +407,48 @@ fun QuizScreen(
 
                     QuizCard(
                         quiz = quiz,
-
+                        nombreTema =
+                            quizViewModel
+                                .nombreTema(
+                                    quiz.temaId
+                                ),
+                        mejorNota =
+                            quizViewModel
+                                .mejorNota(
+                                    quiz.id
+                                ),
                         onAdministrar = {
 
-                            quizAdministrandoId =
-                                quiz.id
-
-                            quizResolviendoId =
-                                null
-
-                            resultadoTexto =
-                                null
-
-                            respuestasUsuario =
-                                emptyMap()
+                            quizViewModel
+                                .administrarQuiz(
+                                    quiz
+                                )
                         },
-
                         onResolver = {
 
-                            quizResolviendoId =
-                                quiz.id
-
-                            quizAdministrandoId =
-                                null
-
-                            respuestasUsuario =
-                                emptyMap()
-
-                            resultadoTexto =
-                                null
+                            quizViewModel
+                                .resolverQuiz(
+                                    quiz
+                                )
                         },
-
                         onEliminar = {
 
-                            quizAEliminar =
-                                quiz
+                            quizViewModel
+                                .solicitarEliminarQuiz(
+                                    quiz
+                                )
                         }
                     )
                 }
             }
 
+            // =================================================
+            // ADMINISTRAR PREGUNTAS
+            // =================================================
+
             if (
-                quizAdministrando != null
+                quizAdministrando !=
+                null
             ) {
 
                 item {
@@ -503,7 +457,9 @@ fun QuizScreen(
                         modifier =
                             Modifier.fillMaxWidth(),
                         shape =
-                            RoundedCornerShape(20.dp),
+                            RoundedCornerShape(
+                                20.dp
+                            ),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
@@ -513,13 +469,16 @@ fun QuizScreen(
 
                         Column(
                             modifier =
-                                Modifier.padding(20.dp)
+                                Modifier.padding(
+                                    20.dp
+                                )
                         ) {
 
                             Text(
                                 text =
                                     "Administrar Quiz",
-                                fontSize = 20.sp,
+                                fontSize =
+                                    20.sp,
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -534,89 +493,139 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(14.dp)
+                                    Modifier.height(
+                                        14.dp
+                                    )
                             )
 
                             OutlinedTextField(
                                 value =
-                                    enunciado,
+                                    quizViewModel
+                                        .enunciado,
                                 onValueChange = {
-                                    enunciado = it
-                                    errorPregunta =
-                                        null
+
+                                    quizViewModel
+                                        .cambiarEnunciado(
+                                            it
+                                        )
                                 },
                                 label = {
-                                    Text("Pregunta")
+
+                                    Text(
+                                        "Pregunta"
+                                    )
                                 },
                                 placeholder = {
+
                                     Text(
                                         "Ej. ¿Qué es Jetpack Compose?"
                                     )
                                 },
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier
+                                        .fillMaxWidth()
                             )
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(8.dp)
+                                    Modifier.height(
+                                        8.dp
+                                    )
                             )
 
                             OutlinedTextField(
-                                value = opcion1,
+                                value =
+                                    quizViewModel
+                                        .opcion1,
                                 onValueChange = {
-                                    opcion1 = it
+
+                                    quizViewModel
+                                        .cambiarOpcion1(
+                                            it
+                                        )
                                 },
                                 label = {
-                                    Text("Opción A")
+                                    Text(
+                                        "Opción A"
+                                    )
                                 },
                                 singleLine = true,
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier
+                                        .fillMaxWidth()
                             )
 
                             OutlinedTextField(
-                                value = opcion2,
+                                value =
+                                    quizViewModel
+                                        .opcion2,
                                 onValueChange = {
-                                    opcion2 = it
+
+                                    quizViewModel
+                                        .cambiarOpcion2(
+                                            it
+                                        )
                                 },
                                 label = {
-                                    Text("Opción B")
+                                    Text(
+                                        "Opción B"
+                                    )
                                 },
                                 singleLine = true,
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier
+                                        .fillMaxWidth()
                             )
 
                             OutlinedTextField(
-                                value = opcion3,
+                                value =
+                                    quizViewModel
+                                        .opcion3,
                                 onValueChange = {
-                                    opcion3 = it
+
+                                    quizViewModel
+                                        .cambiarOpcion3(
+                                            it
+                                        )
                                 },
                                 label = {
-                                    Text("Opción C")
+                                    Text(
+                                        "Opción C"
+                                    )
                                 },
                                 singleLine = true,
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier
+                                        .fillMaxWidth()
                             )
 
                             OutlinedTextField(
-                                value = opcion4,
+                                value =
+                                    quizViewModel
+                                        .opcion4,
                                 onValueChange = {
-                                    opcion4 = it
+
+                                    quizViewModel
+                                        .cambiarOpcion4(
+                                            it
+                                        )
                                 },
                                 label = {
-                                    Text("Opción D")
+                                    Text(
+                                        "Opción D"
+                                    )
                                 },
                                 singleLine = true,
                                 modifier =
-                                    Modifier.fillMaxWidth()
+                                    Modifier
+                                        .fillMaxWidth()
                             )
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(12.dp)
+                                    Modifier.height(
+                                        12.dp
+                                    )
                             )
 
                             Text(
@@ -630,10 +639,14 @@ fun QuizScreen(
                                 texto = "A",
                                 indice = 0,
                                 seleccion =
-                                    respuestaCorrecta,
+                                    quizViewModel
+                                        .respuestaCorrecta,
                                 onSeleccionar = {
-                                    respuestaCorrecta =
-                                        0
+
+                                    quizViewModel
+                                        .seleccionarRespuestaCorrecta(
+                                            0
+                                        )
                                 }
                             )
 
@@ -641,10 +654,14 @@ fun QuizScreen(
                                 texto = "B",
                                 indice = 1,
                                 seleccion =
-                                    respuestaCorrecta,
+                                    quizViewModel
+                                        .respuestaCorrecta,
                                 onSeleccionar = {
-                                    respuestaCorrecta =
-                                        1
+
+                                    quizViewModel
+                                        .seleccionarRespuestaCorrecta(
+                                            1
+                                        )
                                 }
                             )
 
@@ -652,10 +669,14 @@ fun QuizScreen(
                                 texto = "C",
                                 indice = 2,
                                 seleccion =
-                                    respuestaCorrecta,
+                                    quizViewModel
+                                        .respuestaCorrecta,
                                 onSeleccionar = {
-                                    respuestaCorrecta =
-                                        2
+
+                                    quizViewModel
+                                        .seleccionarRespuestaCorrecta(
+                                            2
+                                        )
                                 }
                             )
 
@@ -663,88 +684,46 @@ fun QuizScreen(
                                 texto = "D",
                                 indice = 3,
                                 seleccion =
-                                    respuestaCorrecta,
+                                    quizViewModel
+                                        .respuestaCorrecta,
                                 onSeleccionar = {
-                                    respuestaCorrecta =
-                                        3
+
+                                    quizViewModel
+                                        .seleccionarRespuestaCorrecta(
+                                            3
+                                        )
                                 }
                             )
 
-                            if (
-                                errorPregunta != null
-                            ) {
+                            quizViewModel
+                                .errorPregunta
+                                ?.let {
 
-                                Text(
-                                    text =
-                                        errorPregunta!!,
-                                    color =
-                                        MaterialTheme
-                                            .colorScheme
-                                            .error
-                                )
-                            }
+                                    Text(
+                                        text = it,
+                                        color =
+                                            MaterialTheme
+                                                .colorScheme
+                                                .error
+                                    )
+                                }
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(12.dp)
+                                    Modifier.height(
+                                        12.dp
+                                    )
                             )
 
                             Button(
                                 onClick = {
 
-                                    val correcta =
-                                        respuestaCorrecta
-
-                                    if (correcta == null) {
-
-                                        errorPregunta =
-                                            "Selecciona la respuesta correcta."
-
-                                        return@Button
-                                    }
-
-                                    val resultado =
-                                        QuizRepository
-                                            .agregarPregunta(
-                                                quizId =
-                                                    quizAdministrando
-                                                        .id,
-                                                enunciado =
-                                                    enunciado,
-                                                opcion1 =
-                                                    opcion1,
-                                                opcion2 =
-                                                    opcion2,
-                                                opcion3 =
-                                                    opcion3,
-                                                opcion4 =
-                                                    opcion4,
-                                                respuestaCorrecta =
-                                                    correcta
-                                            )
-
-                                    if (resultado == null) {
-
-                                        enunciado = ""
-                                        opcion1 = ""
-                                        opcion2 = ""
-                                        opcion3 = ""
-                                        opcion4 = ""
-
-                                        respuestaCorrecta =
-                                            null
-
-                                        errorPregunta =
-                                            null
-
-                                    } else {
-
-                                        errorPregunta =
-                                            resultado
-                                    }
+                                    quizViewModel
+                                        .agregarPregunta()
                                 },
                                 modifier =
-                                    Modifier.fillMaxWidth(),
+                                    Modifier
+                                        .fillMaxWidth(),
                                 colors =
                                     ButtonDefaults
                                         .buttonColors(
@@ -760,7 +739,9 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(18.dp)
+                                    Modifier.height(
+                                        18.dp
+                                    )
                             )
 
                             Text(
@@ -772,7 +753,9 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(8.dp)
+                                    Modifier.height(
+                                        8.dp
+                                    )
                             )
 
                             quizAdministrando
@@ -799,9 +782,10 @@ fun QuizScreen(
 
                                         Column(
                                             modifier =
-                                                Modifier.padding(
-                                                    12.dp
-                                                )
+                                                Modifier
+                                                    .padding(
+                                                        12.dp
+                                                    )
                                         ) {
 
                                             Text(
@@ -815,10 +799,8 @@ fun QuizScreen(
                                             Text(
                                                 text =
                                                     "Correcta: ${
-                                                        pregunta
-                                                            .opciones[
-                                                            pregunta
-                                                                .respuestaCorrecta
+                                                        pregunta.opciones[
+                                                            pregunta.respuestaCorrecta
                                                         ]
                                                     }",
                                                 color =
@@ -828,11 +810,10 @@ fun QuizScreen(
                                             TextButton(
                                                 onClick = {
 
-                                                    QuizRepository
+                                                    quizViewModel
                                                         .eliminarPregunta(
                                                             quizId =
-                                                                quizAdministrando
-                                                                    .id,
+                                                                quizAdministrando.id,
                                                             preguntaId =
                                                                 pregunta.id
                                                         )
@@ -851,8 +832,13 @@ fun QuizScreen(
                 }
             }
 
+            // =================================================
+            // RESOLVER QUIZ
+            // =================================================
+
             if (
-                quizResolviendo != null
+                quizResolviendo !=
+                null
             ) {
 
                 item {
@@ -861,7 +847,9 @@ fun QuizScreen(
                         modifier =
                             Modifier.fillMaxWidth(),
                         shape =
-                            RoundedCornerShape(20.dp),
+                            RoundedCornerShape(
+                                20.dp
+                            ),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
@@ -871,13 +859,16 @@ fun QuizScreen(
 
                         Column(
                             modifier =
-                                Modifier.padding(20.dp)
+                                Modifier.padding(
+                                    20.dp
+                                )
                         ) {
 
                             Text(
                                 text =
                                     "Resolver Quiz",
-                                fontSize = 20.sp,
+                                fontSize =
+                                    20.sp,
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -892,7 +883,9 @@ fun QuizScreen(
 
                             Spacer(
                                 modifier =
-                                    Modifier.height(16.dp)
+                                    Modifier.height(
+                                        16.dp
+                                    )
                             )
 
                             if (
@@ -931,23 +924,26 @@ fun QuizScreen(
 
                                                 Row(
                                                     modifier =
-                                                        Modifier.fillMaxWidth()
+                                                        Modifier
+                                                            .fillMaxWidth()
                                                 ) {
 
                                                     RadioButton(
                                                         selected =
-                                                            respuestasUsuario[
+                                                            quizViewModel
+                                                                .respuestasUsuario[
                                                                 pregunta.id
                                                             ] ==
                                                                     indiceOpcion,
                                                         onClick = {
 
-                                                            respuestasUsuario =
-                                                                respuestasUsuario +
-                                                                        (
-                                                                                pregunta.id to
-                                                                                        indiceOpcion
-                                                                                )
+                                                            quizViewModel
+                                                                .seleccionarRespuesta(
+                                                                    preguntaId =
+                                                                        pregunta.id,
+                                                                    opcion =
+                                                                        indiceOpcion
+                                                                )
                                                         }
                                                     )
 
@@ -955,61 +951,33 @@ fun QuizScreen(
                                                         text =
                                                             opcion,
                                                         modifier =
-                                                            Modifier.padding(
-                                                                top =
-                                                                    12.dp
-                                                            )
+                                                            Modifier
+                                                                .padding(
+                                                                    top =
+                                                                        12.dp
+                                                                )
                                                     )
                                                 }
                                             }
 
                                         Spacer(
                                             modifier =
-                                                Modifier.height(12.dp)
+                                                Modifier
+                                                    .height(
+                                                        12.dp
+                                                    )
                                         )
                                     }
 
                                 Button(
                                     onClick = {
 
-                                        if (
-                                            respuestasUsuario
-                                                .size <
-                                            quizResolviendo
-                                                .preguntas
-                                                .size
-                                        ) {
-
-                                            resultadoTexto =
-                                                "Debes responder todas las preguntas."
-
-                                            return@Button
-                                        }
-
-                                        val intento =
-                                            QuizRepository
-                                                .registrarIntento(
-                                                    quizId =
-                                                        quizResolviendo
-                                                            .id,
-                                                    respuestas =
-                                                        respuestasUsuario
-                                                )
-
-                                        if (intento != null) {
-
-                                            resultadoTexto =
-                                                "Resultado: ${
-                                                    String.format(
-                                                        Locale.getDefault(),
-                                                        "%.0f",
-                                                        intento.porcentaje
-                                                    )
-                                                }% - ${intento.respuestasCorrectas}/${intento.totalPreguntas} correctas"
-                                        }
+                                        quizViewModel
+                                            .finalizarQuiz()
                                     },
                                     modifier =
-                                        Modifier.fillMaxWidth(),
+                                        Modifier
+                                            .fillMaxWidth(),
                                     colors =
                                         ButtonDefaults
                                             .buttonColors(
@@ -1023,35 +991,39 @@ fun QuizScreen(
                                     )
                                 }
 
-                                if (
-                                    resultadoTexto != null
-                                ) {
+                                quizViewModel
+                                    .resultadoTexto
+                                    ?.let { resultado ->
 
-                                    Spacer(
-                                        modifier =
-                                            Modifier.height(12.dp)
-                                    )
-
-                                    Text(
-                                        text =
-                                            resultadoTexto!!,
-                                        fontSize = 18.sp,
-                                        fontWeight =
-                                            FontWeight.Bold,
-                                        color =
-                                            if (
-                                                resultadoTexto!!
-                                                    .startsWith(
-                                                        "Resultado"
+                                        Spacer(
+                                            modifier =
+                                                Modifier
+                                                    .height(
+                                                        12.dp
                                                     )
-                                            )
-                                                colorPrincipal
-                                            else
-                                                MaterialTheme
-                                                    .colorScheme
-                                                    .error
-                                    )
-                                }
+                                        )
+
+                                        Text(
+                                            text =
+                                                resultado,
+                                            fontSize =
+                                                18.sp,
+                                            fontWeight =
+                                                FontWeight.Bold,
+                                            color =
+                                                if (
+                                                    resultado
+                                                        .startsWith(
+                                                            "Resultado"
+                                                        )
+                                                )
+                                                    colorPrincipal
+                                                else
+                                                    MaterialTheme
+                                                        .colorScheme
+                                                        .error
+                                        )
+                                    }
                             }
                         }
                     }
@@ -1062,60 +1034,36 @@ fun QuizScreen(
 
                 Spacer(
                     modifier =
-                        Modifier.height(30.dp)
+                        Modifier.height(
+                            30.dp
+                        )
                 )
             }
         }
     }
 
-    if (quizAEliminar != null) {
+    val quizAEliminar =
+        quizViewModel.quizAEliminar
+
+    if (
+        quizAEliminar !=
+        null
+    ) {
 
         ConfirmDeleteDialog(
             titulo =
                 "Eliminar Quiz",
             mensaje =
-                "¿Seguro que deseas eliminar \"${quizAEliminar!!.titulo}\"? También se eliminarán sus preguntas e intentos registrados.",
+                "¿Seguro que deseas eliminar \"${quizAEliminar.titulo}\"? También se eliminarán sus preguntas e intentos registrados.",
             onConfirm = {
 
-                val id =
-                    quizAEliminar!!.id
-
-                QuizRepository
-                    .eliminarQuiz(
-                        id
-                    )
-
-                if (
-                    quizAdministrandoId ==
-                    id
-                ) {
-
-                    quizAdministrandoId =
-                        null
-                }
-
-                if (
-                    quizResolviendoId ==
-                    id
-                ) {
-
-                    quizResolviendoId =
-                        null
-                }
-
-                respuestasUsuario =
-                    emptyMap()
-
-                resultadoTexto =
-                    null
-
-                quizAEliminar =
-                    null
+                quizViewModel
+                    .confirmarEliminarQuiz()
             },
             onDismiss = {
 
-                quizAEliminar =
-                    null
+                quizViewModel
+                    .cancelarEliminarQuiz()
             }
         )
     }
@@ -1155,28 +1103,20 @@ private fun OpcionCorrecta(
 @Composable
 private fun QuizCard(
     quiz: Quiz,
+    nombreTema: String,
+    mejorNota: Double?,
     onAdministrar: () -> Unit,
     onResolver: () -> Unit,
     onEliminar: () -> Unit
 ) {
 
-    val tema =
-        AcademicRepository
-            .obtenerTema(
-                quiz.temaId
-            )
-
-    val mejorNota =
-        QuizRepository
-            .mejorNota(
-                quiz.id
-            )
-
     Card(
         modifier =
             Modifier.fillMaxWidth(),
         shape =
-            RoundedCornerShape(18.dp),
+            RoundedCornerShape(
+                18.dp
+            ),
         colors =
             CardDefaults.cardColors(
                 containerColor =
@@ -1186,13 +1126,14 @@ private fun QuizCard(
 
         Column(
             modifier =
-                Modifier.padding(16.dp)
+                Modifier.padding(
+                    16.dp
+                )
         ) {
 
             Text(
                 text =
-                    tema?.nombre
-                        ?: "Tema",
+                    nombreTema,
                 color =
                     Color(0xFF4F46E5),
                 fontWeight =
@@ -1201,19 +1142,25 @@ private fun QuizCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(4.dp)
+                    Modifier.height(
+                        4.dp
+                    )
             )
 
             Text(
-                text = quiz.titulo,
-                fontSize = 18.sp,
+                text =
+                    quiz.titulo,
+                fontSize =
+                    18.sp,
                 fontWeight =
                     FontWeight.Bold
             )
 
             Spacer(
                 modifier =
-                    Modifier.height(6.dp)
+                    Modifier.height(
+                        6.dp
+                    )
             )
 
             Text(
@@ -1223,7 +1170,10 @@ private fun QuizCard(
                     Color.Gray
             )
 
-            if (mejorNota != null) {
+            if (
+                mejorNota !=
+                null
+            ) {
 
                 Text(
                     text =
@@ -1241,19 +1191,25 @@ private fun QuizCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(12.dp)
+                    Modifier.height(
+                        12.dp
+                    )
             )
 
             Button(
                 onClick =
                     onAdministrar,
                 modifier =
-                    Modifier.fillMaxWidth(),
+                    Modifier
+                        .fillMaxWidth(),
                 colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor =
-                            Color(0xFF4F46E5)
-                    )
+                    ButtonDefaults
+                        .buttonColors(
+                            containerColor =
+                                Color(
+                                    0xFF4F46E5
+                                )
+                        )
             ) {
 
                 Text(
@@ -1263,7 +1219,9 @@ private fun QuizCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(8.dp)
+                    Modifier.height(
+                        8.dp
+                    )
             )
 
             OutlinedButton(
@@ -1273,7 +1231,8 @@ private fun QuizCard(
                     quiz.preguntas
                         .isNotEmpty(),
                 modifier =
-                    Modifier.fillMaxWidth()
+                    Modifier
+                        .fillMaxWidth()
             ) {
 
                 Text(
@@ -1285,7 +1244,8 @@ private fun QuizCard(
                 onClick =
                     onEliminar,
                 modifier =
-                    Modifier.fillMaxWidth()
+                    Modifier
+                        .fillMaxWidth()
             ) {
 
                 Text(
