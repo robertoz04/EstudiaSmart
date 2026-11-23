@@ -383,7 +383,7 @@ mockups/
 
 ### Login
 
-![Login de EstudiaSmart](mockups/login.png)
+![Login de EstudiaSmart](mockups/Login.png)
 
 ### Inicio
 
@@ -395,15 +395,15 @@ mockups/
 
 ### Flashcards
 
-![Pantalla de flashcards](mockups/flashcards.png)
+![Pantalla de flashcards](mockups/Flashcards.png)
 
 ### Quiz
 
-![Pantalla de Quiz](mockups/quiz.png)
+![Pantalla de Quiz](mockups/Quiz.png)
 
 ### Progreso
 
-![Pantalla de progreso](mockups/progreso.png)
+![Pantalla de progreso](mockups/Progreso.png)
 
 ---
 
