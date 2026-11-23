@@ -33,22 +33,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AcademicRepository
-import com.estudiasmart.app.data.FlashcardRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.estudiasmart.app.model.Dificultad
 import com.estudiasmart.app.model.Flashcard
 import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
+import com.estudiasmart.app.viewmodel.FlashcardViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun FlashcardsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    flashcardViewModel:
+    FlashcardViewModel =
+        viewModel()
 ) {
 
     val temas =
-        AcademicRepository.temas
+        flashcardViewModel.temas
 
     if (temas.isEmpty()) {
 
@@ -70,52 +73,30 @@ fun FlashcardsScreen(
             Text(
                 text = "Flashcards",
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF4F46E5)
+                fontWeight =
+                    FontWeight.Bold,
+                color =
+                    Color(0xFF4F46E5)
             )
 
             Spacer(
-                modifier = Modifier.height(20.dp)
+                modifier =
+                    Modifier.height(20.dp)
             )
 
             Text(
                 text =
                     "Primero debes crear una materia y al menos un tema para poder agregar flashcards.",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
         }
 
         return
     }
 
-    var pregunta by remember {
-        mutableStateOf("")
-    }
-
-    var respuesta by remember {
-        mutableStateOf("")
-    }
-
-    var temaSeleccionadoId by remember {
-        mutableStateOf<Int?>(
-            temas.firstOrNull()?.id
-        )
-    }
-
     var menuTemasAbierto by remember {
         mutableStateOf(false)
-    }
-
-    var error by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var flashcardEditando by remember {
-        mutableStateOf<Flashcard?>(null)
-    }
-
-    var flashcardAEliminar by remember {
-        mutableStateOf<Flashcard?>(null)
     }
 
     val colorPrincipal =
@@ -123,6 +104,9 @@ fun FlashcardsScreen(
 
     val fondo =
         Color(0xFFF6F7FB)
+
+    val flashcards =
+        flashcardViewModel.flashcards
 
     LazyColumn(
         modifier = Modifier
@@ -132,86 +116,110 @@ fun FlashcardsScreen(
                 horizontal = 20.dp
             ),
         verticalArrangement =
-            Arrangement.spacedBy(12.dp)
+            Arrangement.spacedBy(
+                12.dp
+            )
     ) {
 
         item {
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier =
+                    Modifier.height(12.dp)
             )
 
             TextButton(
                 onClick = onBack
             ) {
-                Text("← Volver al inicio")
+                Text(
+                    "← Volver al inicio"
+                )
             }
 
             Text(
                 text = "Flashcards",
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorPrincipal
+                fontWeight =
+                    FontWeight.Bold,
+                color =
+                    colorPrincipal
             )
 
             Text(
                 text =
                     "Repasa tus conceptos con repetición espaciada.",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier =
+                    Modifier.height(16.dp)
             )
 
             Card(
                 modifier =
                     Modifier.fillMaxWidth(),
                 shape =
-                    RoundedCornerShape(20.dp),
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor =
-                            Color.White
+                    RoundedCornerShape(
+                        20.dp
                     ),
+                colors =
+                    CardDefaults
+                        .cardColors(
+                            containerColor =
+                                Color.White
+                        ),
                 elevation =
-                    CardDefaults.cardElevation(
-                        defaultElevation = 3.dp
-                    )
+                    CardDefaults
+                        .cardElevation(
+                            defaultElevation =
+                                3.dp
+                        )
             ) {
 
                 Column(
                     modifier =
-                        Modifier.padding(20.dp)
+                        Modifier.padding(
+                            20.dp
+                        )
                 ) {
 
                     Text(
                         text =
                             if (
-                                flashcardEditando == null
+                                flashcardViewModel
+                                    .flashcardEditando ==
+                                null
                             )
                                 "Nueva flashcard"
                             else
                                 "Editar flashcard",
-                        fontSize = 20.sp,
+                        fontSize =
+                            20.sp,
                         fontWeight =
                             FontWeight.Bold
                     )
 
                     Spacer(
                         modifier =
-                            Modifier.height(14.dp)
+                            Modifier.height(
+                                14.dp
+                            )
                     )
 
                     Text(
-                        text = "Tema",
+                        text =
+                            "Tema",
                         fontWeight =
                             FontWeight.Medium
                     )
 
                     Spacer(
                         modifier =
-                            Modifier.height(6.dp)
+                            Modifier.height(
+                                6.dp
+                            )
                     )
 
                     Box(
@@ -225,13 +233,16 @@ fun FlashcardsScreen(
                                     true
                             },
                             modifier =
-                                Modifier.fillMaxWidth()
+                                Modifier
+                                    .fillMaxWidth()
                         ) {
 
                             val tema =
                                 temas.find {
+
                                     it.id ==
-                                            temaSeleccionadoId
+                                            flashcardViewModel
+                                                .temaSeleccionadoId
                                 }
 
                             Text(
@@ -245,6 +256,7 @@ fun FlashcardsScreen(
                             expanded =
                                 menuTemasAbierto,
                             onDismissRequest = {
+
                                 menuTemasAbierto =
                                     false
                             }
@@ -254,19 +266,20 @@ fun FlashcardsScreen(
 
                                 DropdownMenuItem(
                                     text = {
+
                                         Text(
                                             tema.nombre
                                         )
                                     },
                                     onClick = {
 
-                                        temaSeleccionadoId =
-                                            tema.id
+                                        flashcardViewModel
+                                            .seleccionarTema(
+                                                tema.id
+                                            )
 
                                         menuTemasAbierto =
                                             false
-
-                                        error = null
                                     }
                                 )
                             }
@@ -275,17 +288,26 @@ fun FlashcardsScreen(
 
                     Spacer(
                         modifier =
-                            Modifier.height(12.dp)
+                            Modifier.height(
+                                12.dp
+                            )
                     )
 
                     OutlinedTextField(
-                        value = pregunta,
+                        value =
+                            flashcardViewModel
+                                .pregunta,
                         onValueChange = {
-                            pregunta = it
-                            error = null
+
+                            flashcardViewModel
+                                .cambiarPregunta(
+                                    it
+                                )
                         },
                         label = {
-                            Text("Pregunta")
+                            Text(
+                                "Pregunta"
+                            )
                         },
                         placeholder = {
                             Text(
@@ -293,22 +315,32 @@ fun FlashcardsScreen(
                             )
                         },
                         modifier =
-                            Modifier.fillMaxWidth()
+                            Modifier
+                                .fillMaxWidth()
                     )
 
                     Spacer(
                         modifier =
-                            Modifier.height(10.dp)
+                            Modifier.height(
+                                10.dp
+                            )
                     )
 
                     OutlinedTextField(
-                        value = respuesta,
+                        value =
+                            flashcardViewModel
+                                .respuesta,
                         onValueChange = {
-                            respuesta = it
-                            error = null
+
+                            flashcardViewModel
+                                .cambiarRespuesta(
+                                    it
+                                )
                         },
                         label = {
-                            Text("Respuesta")
+                            Text(
+                                "Respuesta"
+                            )
                         },
                         placeholder = {
                             Text(
@@ -318,106 +350,47 @@ fun FlashcardsScreen(
                         minLines = 2,
                         maxLines = 5,
                         modifier =
-                            Modifier.fillMaxWidth()
+                            Modifier
+                                .fillMaxWidth()
                     )
 
-                    if (error != null) {
+                    flashcardViewModel
+                        .error
+                        ?.let {
 
-                        Spacer(
-                            modifier =
-                                Modifier.height(8.dp)
-                        )
+                            Spacer(
+                                modifier =
+                                    Modifier
+                                        .height(
+                                            8.dp
+                                        )
+                            )
 
-                        Text(
-                            text = error!!,
-                            color =
-                                Color(0xFFB3261E)
-                        )
-                    }
+                            Text(
+                                text = it,
+                                color =
+                                    Color(
+                                        0xFFB3261E
+                                    )
+                            )
+                        }
 
                     Spacer(
                         modifier =
-                            Modifier.height(16.dp)
+                            Modifier.height(
+                                16.dp
+                            )
                     )
 
                     Button(
                         onClick = {
 
-                            val temaId =
-                                temaSeleccionadoId
-
-                            if (temaId == null) {
-
-                                error =
-                                    "Selecciona un tema."
-
-                                return@Button
-                            }
-
-                            if (
-                                flashcardEditando == null
-                            ) {
-
-                                val resultado =
-                                    FlashcardRepository
-                                        .crearFlashcard(
-                                            temaId =
-                                                temaId,
-                                            pregunta =
-                                                pregunta,
-                                            respuesta =
-                                                respuesta
-                                        )
-
-                                if (
-                                    resultado == null
-                                ) {
-
-                                    pregunta = ""
-                                    respuesta = ""
-                                    error = null
-
-                                } else {
-
-                                    error =
-                                        resultado
-                                }
-
-                            } else {
-
-                                val resultado =
-                                    FlashcardRepository
-                                        .actualizarFlashcard(
-                                            id =
-                                                flashcardEditando!!
-                                                    .id,
-                                            temaId =
-                                                temaId,
-                                            pregunta =
-                                                pregunta,
-                                            respuesta =
-                                                respuesta
-                                        )
-
-                                if (
-                                    resultado == null
-                                ) {
-
-                                    pregunta = ""
-                                    respuesta = ""
-                                    flashcardEditando =
-                                        null
-                                    error = null
-
-                                } else {
-
-                                    error =
-                                        resultado
-                                }
-                            }
+                            flashcardViewModel
+                                .guardarFlashcard()
                         },
                         modifier =
-                            Modifier.fillMaxWidth(),
+                            Modifier
+                                .fillMaxWidth(),
                         colors =
                             ButtonDefaults
                                 .buttonColors(
@@ -428,7 +401,9 @@ fun FlashcardsScreen(
 
                         Text(
                             if (
-                                flashcardEditando == null
+                                flashcardViewModel
+                                    .flashcardEditando ==
+                                null
                             )
                                 "AGREGAR FLASHCARD"
                             else
@@ -437,21 +412,20 @@ fun FlashcardsScreen(
                     }
 
                     if (
-                        flashcardEditando != null
+                        flashcardViewModel
+                            .flashcardEditando !=
+                        null
                     ) {
 
                         TextButton(
                             onClick = {
 
-                                flashcardEditando =
-                                    null
-
-                                pregunta = ""
-                                respuesta = ""
-                                error = null
+                                flashcardViewModel
+                                    .cancelarEdicion()
                             },
                             modifier =
-                                Modifier.fillMaxWidth()
+                                Modifier
+                                    .fillMaxWidth()
                         ) {
 
                             Text(
@@ -473,22 +447,22 @@ fun FlashcardsScreen(
             Text(
                 text =
                     "Flashcards registradas",
-                fontSize = 20.sp,
+                fontSize =
+                    20.sp,
                 fontWeight =
                     FontWeight.Bold
             )
 
             Text(
                 text =
-                    "${FlashcardRepository.flashcards.size} flashcards en total",
-                color = Color.Gray
+                    "${flashcardViewModel.totalFlashcards} flashcards en total",
+                color =
+                    Color.Gray
             )
         }
 
         if (
-            FlashcardRepository
-                .flashcards
-                .isEmpty()
+            flashcards.isEmpty()
         ) {
 
             item {
@@ -496,7 +470,8 @@ fun FlashcardsScreen(
                 Text(
                     text =
                         "Todavía no tienes flashcards.",
-                    color = Color.Gray
+                    color =
+                        Color.Gray
                 )
             }
 
@@ -504,8 +479,7 @@ fun FlashcardsScreen(
 
             items(
                 items =
-                    FlashcardRepository
-                        .flashcards,
+                    flashcards,
                 key = {
                     it.id
                 }
@@ -514,26 +488,37 @@ fun FlashcardsScreen(
                 FlashcardCard(
                     flashcard =
                         flashcard,
+                    nombreTema =
+                        flashcardViewModel
+                            .obtenerTema(
+                                flashcard.temaId
+                            )
+                            ?.nombre
+                            ?: "Tema",
+                    onRepaso = {
+                            dificultad ->
+
+                        flashcardViewModel
+                            .registrarRepaso(
+                                flashcardId =
+                                    flashcard.id,
+                                dificultad =
+                                    dificultad
+                            )
+                    },
                     onEditar = {
 
-                        flashcardEditando =
-                            flashcard
-
-                        temaSeleccionadoId =
-                            flashcard.temaId
-
-                        pregunta =
-                            flashcard.pregunta
-
-                        respuesta =
-                            flashcard.respuesta
-
-                        error = null
+                        flashcardViewModel
+                            .iniciarEdicion(
+                                flashcard
+                            )
                     },
                     onEliminar = {
 
-                        flashcardAEliminar =
-                            flashcard
+                        flashcardViewModel
+                            .solicitarEliminar(
+                                flashcard
+                            )
                     }
                 )
             }
@@ -543,48 +528,36 @@ fun FlashcardsScreen(
 
             Spacer(
                 modifier =
-                    Modifier.height(30.dp)
+                    Modifier.height(
+                        30.dp
+                    )
             )
         }
     }
 
-    if (flashcardAEliminar != null) {
+    val flashcardAEliminar =
+        flashcardViewModel
+            .flashcardAEliminar
+
+    if (
+        flashcardAEliminar !=
+        null
+    ) {
 
         ConfirmDeleteDialog(
             titulo =
                 "Eliminar flashcard",
             mensaje =
-                "¿Seguro que deseas eliminar esta flashcard?\n\n\"${flashcardAEliminar!!.pregunta}\"",
+                "¿Seguro que deseas eliminar esta flashcard?\n\n\"${flashcardAEliminar.pregunta}\"",
             onConfirm = {
 
-                val id =
-                    flashcardAEliminar!!.id
-
-                FlashcardRepository
-                    .eliminarFlashcard(
-                        id
-                    )
-
-                if (
-                    flashcardEditando?.id ==
-                    id
-                ) {
-
-                    flashcardEditando =
-                        null
-
-                    pregunta = ""
-                    respuesta = ""
-                    error = null
-                }
-
-                flashcardAEliminar =
-                    null
+                flashcardViewModel
+                    .confirmarEliminar()
             },
             onDismiss = {
 
-                flashcardAEliminar =
-                    null
+                flashcardViewModel
+                    .cancelarEliminar()
             }
         )
     }
@@ -593,15 +566,12 @@ fun FlashcardsScreen(
 @Composable
 private fun FlashcardCard(
     flashcard: Flashcard,
+    nombreTema: String,
+    onRepaso:
+        (Dificultad) -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit
 ) {
-
-    val tema =
-        AcademicRepository
-            .obtenerTema(
-                flashcard.temaId
-            )
 
     val formatoFecha =
         SimpleDateFormat(
@@ -621,23 +591,27 @@ private fun FlashcardCard(
         modifier =
             Modifier.fillMaxWidth(),
         shape =
-            RoundedCornerShape(18.dp),
+            RoundedCornerShape(
+                18.dp
+            ),
         colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    Color.White
-            )
+            CardDefaults
+                .cardColors(
+                    containerColor =
+                        Color.White
+                )
     ) {
 
         Column(
             modifier =
-                Modifier.padding(16.dp)
+                Modifier.padding(
+                    16.dp
+                )
         ) {
 
             Text(
                 text =
-                    tema?.nombre
-                        ?: "Tema",
+                    nombreTema,
                 color =
                     Color(0xFF4F46E5),
                 fontWeight =
@@ -646,31 +620,39 @@ private fun FlashcardCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(6.dp)
+                    Modifier.height(
+                        6.dp
+                    )
             )
 
             Text(
                 text =
                     flashcard.pregunta,
-                fontSize = 18.sp,
+                fontSize =
+                    18.sp,
                 fontWeight =
                     FontWeight.Bold
             )
 
             Spacer(
                 modifier =
-                    Modifier.height(6.dp)
+                    Modifier.height(
+                        6.dp
+                    )
             )
 
             Text(
                 text =
                     flashcard.respuesta,
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
             Spacer(
                 modifier =
-                    Modifier.height(12.dp)
+                    Modifier.height(
+                        12.dp
+                    )
             )
 
             Text(
@@ -691,12 +673,15 @@ private fun FlashcardCard(
             Text(
                 text =
                     "Próximo repaso: $fecha",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
             Spacer(
                 modifier =
-                    Modifier.height(14.dp)
+                    Modifier.height(
+                        14.dp
+                    )
             )
 
             Text(
@@ -708,24 +693,26 @@ private fun FlashcardCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(8.dp)
+                    Modifier.height(
+                        8.dp
+                    )
             )
 
             Row(
                 modifier =
                     Modifier.fillMaxWidth(),
                 horizontalArrangement =
-                    Arrangement.spacedBy(6.dp)
+                    Arrangement.spacedBy(
+                        6.dp
+                    )
             ) {
 
                 OutlinedButton(
                     onClick = {
 
-                        FlashcardRepository
-                            .registrarRepaso(
-                                flashcard.id,
-                                Dificultad.DIFICIL
-                            )
+                        onRepaso(
+                            Dificultad.DIFICIL
+                        )
                     },
                     modifier =
                         Modifier.weight(1f)
@@ -737,11 +724,9 @@ private fun FlashcardCard(
                 OutlinedButton(
                     onClick = {
 
-                        FlashcardRepository
-                            .registrarRepaso(
-                                flashcard.id,
-                                Dificultad.REGULAR
-                            )
+                        onRepaso(
+                            Dificultad.REGULAR
+                        )
                     },
                     modifier =
                         Modifier.weight(1f)
@@ -753,11 +738,9 @@ private fun FlashcardCard(
                 OutlinedButton(
                     onClick = {
 
-                        FlashcardRepository
-                            .registrarRepaso(
-                                flashcard.id,
-                                Dificultad.FACIL
-                            )
+                        onRepaso(
+                            Dificultad.FACIL
+                        )
                     },
                     modifier =
                         Modifier.weight(1f)
@@ -769,14 +752,18 @@ private fun FlashcardCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(10.dp)
+                    Modifier.height(
+                        10.dp
+                    )
             )
 
             Row(
                 modifier =
                     Modifier.fillMaxWidth(),
                 horizontalArrangement =
-                    Arrangement.spacedBy(8.dp)
+                    Arrangement.spacedBy(
+                        8.dp
+                    )
             ) {
 
                 OutlinedButton(

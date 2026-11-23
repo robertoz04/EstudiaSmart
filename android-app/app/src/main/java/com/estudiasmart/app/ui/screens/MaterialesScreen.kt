@@ -21,29 +21,29 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AcademicRepository
-import com.estudiasmart.app.model.Material
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
+import com.estudiasmart.app.viewmodel.AcademicViewModel
 
 @Composable
 fun MaterialesScreen(
     temaId: Int,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    academicViewModel:
+    AcademicViewModel =
+        viewModel()
 ) {
 
     val tema =
-        AcademicRepository.obtenerTema(
-            temaId
-        )
+        academicViewModel
+            .obtenerTema(
+                temaId
+            )
 
     if (tema == null) {
 
@@ -54,7 +54,8 @@ fun MaterialesScreen(
         ) {
 
             Text(
-                text = "Tema no encontrado."
+                text =
+                    "Tema no encontrado."
             )
 
             TextButton(
@@ -67,25 +68,11 @@ fun MaterialesScreen(
         return
     }
 
-    var titulo by remember {
-        mutableStateOf("")
-    }
-
-    var contenido by remember {
-        mutableStateOf("")
-    }
-
-    var error by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var materialEditando by remember {
-        mutableStateOf<Material?>(null)
-    }
-
-    var materialAEliminar by remember {
-        mutableStateOf<Material?>(null)
-    }
+    val materiales =
+        academicViewModel
+            .materialesPorTema(
+                temaId
+            )
 
     val colorPrincipal =
         Color(0xFF4F46E5)
@@ -103,66 +90,92 @@ fun MaterialesScreen(
         TextButton(
             onClick = onBack
         ) {
-            Text("← Volver a temas")
+            Text(
+                "← Volver a temas"
+            )
         }
 
         Text(
             text = "Materiales",
             fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorPrincipal
+            fontWeight =
+                FontWeight.Bold,
+            color =
+                colorPrincipal
         )
 
         Text(
-            text = tema.nombre,
+            text =
+                tema.nombre,
             fontSize = 17.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight =
+                FontWeight.Medium
         )
 
         Text(
             text =
                 "Agrega recursos para estudiar este tema.",
-            color = Color.Gray
+            color =
+                Color.Gray
         )
 
         Spacer(
-            modifier = Modifier.height(18.dp)
+            modifier =
+                Modifier.height(18.dp)
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 3.dp
-            )
+            modifier =
+                Modifier.fillMaxWidth(),
+            shape =
+                RoundedCornerShape(20.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        Color.White
+                ),
+            elevation =
+                CardDefaults.cardElevation(
+                    defaultElevation =
+                        3.dp
+                )
         ) {
 
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier =
+                    Modifier.padding(20.dp)
             ) {
 
                 Text(
                     text =
-                        if (materialEditando == null)
+                        if (
+                            academicViewModel
+                                .materialEditando ==
+                            null
+                        )
                             "Nuevo material"
                         else
                             "Editar material",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight =
+                        FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier =
+                        Modifier.height(12.dp)
                 )
 
                 OutlinedTextField(
-                    value = titulo,
+                    value =
+                        academicViewModel
+                            .tituloMaterial,
                     onValueChange = {
-                        titulo = it
-                        error = null
+
+                        academicViewModel
+                            .cambiarTituloMaterial(
+                                it
+                            )
                     },
                     label = {
                         Text("Título")
@@ -178,14 +191,20 @@ fun MaterialesScreen(
                 )
 
                 Spacer(
-                    modifier = Modifier.height(10.dp)
+                    modifier =
+                        Modifier.height(10.dp)
                 )
 
                 OutlinedTextField(
-                    value = contenido,
+                    value =
+                        academicViewModel
+                            .contenidoMaterial,
                     onValueChange = {
-                        contenido = it
-                        error = null
+
+                        academicViewModel
+                            .cambiarContenidoMaterial(
+                                it
+                            )
                     },
                     label = {
                         Text("Contenido")
@@ -201,133 +220,112 @@ fun MaterialesScreen(
                         Modifier.fillMaxWidth()
                 )
 
-                if (error != null) {
+                academicViewModel
+                    .errorMaterial
+                    ?.let {
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+                        Spacer(
+                            modifier =
+                                Modifier.height(
+                                    8.dp
+                                )
+                        )
 
-                    Text(
-                        text = error!!,
-                        color = Color(0xFFB3261E)
-                    )
-                }
+                        Text(
+                            text = it,
+                            color =
+                                Color(
+                                    0xFFB3261E
+                                )
+                        )
+                    }
 
                 Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier =
+                        Modifier.height(16.dp)
                 )
 
                 Button(
                     onClick = {
 
-                        if (materialEditando == null) {
-
-                            val resultado =
-                                AcademicRepository
-                                    .crearMaterial(
-                                        temaId = temaId,
-                                        titulo = titulo,
-                                        contenido = contenido
-                                    )
-
-                            if (resultado == null) {
-
-                                titulo = ""
-                                contenido = ""
-                                error = null
-
-                            } else {
-
-                                error = resultado
-                            }
-
-                        } else {
-
-                            val resultado =
-                                AcademicRepository
-                                    .actualizarMaterial(
-                                        id =
-                                            materialEditando!!.id,
-                                        titulo = titulo,
-                                        contenido = contenido
-                                    )
-
-                            if (resultado == null) {
-
-                                titulo = ""
-                                contenido = ""
-                                materialEditando = null
-                                error = null
-
-                            } else {
-
-                                error = resultado
-                            }
-                        }
+                        academicViewModel
+                            .guardarMaterial(
+                                temaId
+                            )
                     },
                     modifier =
                         Modifier.fillMaxWidth(),
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                colorPrincipal
-                        )
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    colorPrincipal
+                            )
                 ) {
 
                     Text(
-                        if (materialEditando == null)
+                        if (
+                            academicViewModel
+                                .materialEditando ==
+                            null
+                        )
                             "AGREGAR MATERIAL"
                         else
                             "GUARDAR CAMBIOS"
                     )
                 }
 
-                if (materialEditando != null) {
+                if (
+                    academicViewModel
+                        .materialEditando !=
+                    null
+                ) {
 
                     TextButton(
                         onClick = {
 
-                            materialEditando = null
-                            titulo = ""
-                            contenido = ""
-                            error = null
+                            academicViewModel
+                                .cancelarEdicionMaterial()
                         },
                         modifier =
                             Modifier.fillMaxWidth()
                     ) {
 
-                        Text("Cancelar edición")
+                        Text(
+                            "Cancelar edición"
+                        )
                     }
                 }
             }
         }
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
 
         Text(
-            text = "Materiales registrados",
+            text =
+                "Materiales registrados",
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight =
+                FontWeight.Bold
         )
 
         Spacer(
-            modifier = Modifier.height(10.dp)
+            modifier =
+                Modifier.height(10.dp)
         )
 
-        val materiales =
-            AcademicRepository
-                .materialesPorTema(
-                    temaId
-                )
-
-        if (materiales.isEmpty()) {
+        if (
+            materiales.isEmpty()
+        ) {
 
             Text(
                 text =
                     "Todavía no hay materiales para este tema.",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
         } else {
@@ -340,7 +338,8 @@ fun MaterialesScreen(
             ) {
 
                 items(
-                    items = materiales,
+                    items =
+                        materiales,
                     key = {
                         it.id
                     }
@@ -354,10 +353,11 @@ fun MaterialesScreen(
                                 16.dp
                             ),
                         colors =
-                            CardDefaults.cardColors(
-                                containerColor =
-                                    Color.White
-                            )
+                            CardDefaults
+                                .cardColors(
+                                    containerColor =
+                                        Color.White
+                                )
                     ) {
 
                         Column(
@@ -368,8 +368,10 @@ fun MaterialesScreen(
                         ) {
 
                             Text(
-                                text = material.titulo,
-                                fontSize = 18.sp,
+                                text =
+                                    material.titulo,
+                                fontSize =
+                                    18.sp,
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -382,8 +384,10 @@ fun MaterialesScreen(
                             )
 
                             Text(
-                                text = material.contenido,
-                                color = Color.Gray
+                                text =
+                                    material.contenido,
+                                color =
+                                    Color.Gray
                             )
 
                             Spacer(
@@ -405,19 +409,15 @@ fun MaterialesScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        materialEditando =
-                                            material
-
-                                        titulo =
-                                            material.titulo
-
-                                        contenido =
-                                            material.contenido
-
-                                        error = null
+                                        academicViewModel
+                                            .iniciarEdicionMaterial(
+                                                material
+                                            )
                                     },
                                     modifier =
-                                        Modifier.weight(1f)
+                                        Modifier.weight(
+                                            1f
+                                        )
                                 ) {
 
                                     Text("Editar")
@@ -426,11 +426,15 @@ fun MaterialesScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        materialAEliminar =
-                                            material
+                                        academicViewModel
+                                            .solicitarEliminarMaterial(
+                                                material
+                                            )
                                     },
                                     modifier =
-                                        Modifier.weight(1f)
+                                        Modifier.weight(
+                                            1f
+                                        )
                                 ) {
 
                                     Text("Eliminar")
@@ -443,39 +447,29 @@ fun MaterialesScreen(
         }
     }
 
-    if (materialAEliminar != null) {
+    val materialAEliminar =
+        academicViewModel
+            .materialAEliminar
+
+    if (
+        materialAEliminar !=
+        null
+    ) {
 
         ConfirmDeleteDialog(
             titulo =
                 "Eliminar material",
             mensaje =
-                "¿Seguro que deseas eliminar \"${materialAEliminar!!.titulo}\"? Esta acción no se puede deshacer.",
+                "¿Seguro que deseas eliminar \"${materialAEliminar.titulo}\"? Esta acción no se puede deshacer.",
             onConfirm = {
 
-                val id =
-                    materialAEliminar!!.id
-
-                AcademicRepository
-                    .eliminarMaterial(
-                        id
-                    )
-
-                if (
-                    materialEditando?.id ==
-                    id
-                ) {
-
-                    materialEditando = null
-                    titulo = ""
-                    contenido = ""
-                    error = null
-                }
-
-                materialAEliminar = null
+                academicViewModel
+                    .confirmarEliminarMaterial()
             },
             onDismiss = {
 
-                materialAEliminar = null
+                academicViewModel
+                    .cancelarEliminarMaterial()
             }
         )
     }

@@ -21,50 +21,32 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AcademicRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.estudiasmart.app.model.Materia
 import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
+import com.estudiasmart.app.viewmodel.AcademicViewModel
 
 @Composable
 fun MateriasScreen(
     onBack: () -> Unit,
-    onVerTemas: (Materia) -> Unit
+    onVerTemas: (Materia) -> Unit,
+    academicViewModel: AcademicViewModel =
+        viewModel()
 ) {
-
-    var nombre by remember {
-        mutableStateOf("")
-    }
-
-    var descripcion by remember {
-        mutableStateOf("")
-    }
-
-    var error by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var materiaEditando by remember {
-        mutableStateOf<Materia?>(null)
-    }
-
-    var materiaAEliminar by remember {
-        mutableStateOf<Materia?>(null)
-    }
 
     val colorPrincipal =
         Color(0xFF4F46E5)
 
     val fondo =
         Color(0xFFF6F7FB)
+
+    val materias =
+        academicViewModel.materias
 
     Column(
         modifier = Modifier
@@ -93,12 +75,15 @@ fun MateriasScreen(
         )
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            modifier =
+                Modifier.fillMaxWidth(),
+            shape =
+                RoundedCornerShape(20.dp),
             colors =
                 CardDefaults.cardColors(
                     containerColor =
@@ -106,7 +91,8 @@ fun MateriasScreen(
                 ),
             elevation =
                 CardDefaults.cardElevation(
-                    defaultElevation = 3.dp
+                    defaultElevation =
+                        3.dp
                 )
         ) {
 
@@ -118,7 +104,8 @@ fun MateriasScreen(
                 Text(
                     text =
                         if (
-                            materiaEditando ==
+                            academicViewModel
+                                .materiaEditando ==
                             null
                         )
                             "Nueva materia"
@@ -135,10 +122,15 @@ fun MateriasScreen(
                 )
 
                 OutlinedTextField(
-                    value = nombre,
+                    value =
+                        academicViewModel
+                            .nombreMateria,
                     onValueChange = {
-                        nombre = it
-                        error = null
+
+                        academicViewModel
+                            .cambiarNombreMateria(
+                                it
+                            )
                     },
                     label = {
                         Text("Nombre")
@@ -159,9 +151,15 @@ fun MateriasScreen(
                 )
 
                 OutlinedTextField(
-                    value = descripcion,
+                    value =
+                        academicViewModel
+                            .descripcionMateria,
                     onValueChange = {
-                        descripcion = it
+
+                        academicViewModel
+                            .cambiarDescripcionMateria(
+                                it
+                            )
                     },
                     label = {
                         Text("Descripción")
@@ -175,19 +173,25 @@ fun MateriasScreen(
                         Modifier.fillMaxWidth()
                 )
 
-                if (error != null) {
+                academicViewModel
+                    .errorMateria
+                    ?.let {
 
-                    Spacer(
-                        modifier =
-                            Modifier.height(8.dp)
-                    )
+                        Spacer(
+                            modifier =
+                                Modifier.height(
+                                    8.dp
+                                )
+                        )
 
-                    Text(
-                        text = error!!,
-                        color =
-                            Color(0xFFB3261E)
-                    )
-                }
+                        Text(
+                            text = it,
+                            color =
+                                Color(
+                                    0xFFB3261E
+                                )
+                        )
+                    }
 
                 Spacer(
                     modifier =
@@ -197,66 +201,8 @@ fun MateriasScreen(
                 Button(
                     onClick = {
 
-                        if (
-                            materiaEditando ==
-                            null
-                        ) {
-
-                            val resultado =
-                                AcademicRepository
-                                    .crearMateria(
-                                        nombre =
-                                            nombre,
-                                        descripcion =
-                                            descripcion
-                                    )
-
-                            if (
-                                resultado ==
-                                null
-                            ) {
-
-                                nombre = ""
-                                descripcion = ""
-                                error = null
-
-                            } else {
-
-                                error =
-                                    resultado
-                            }
-
-                        } else {
-
-                            val resultado =
-                                AcademicRepository
-                                    .actualizarMateria(
-                                        id =
-                                            materiaEditando!!
-                                                .id,
-                                        nombre =
-                                            nombre,
-                                        descripcion =
-                                            descripcion
-                                    )
-
-                            if (
-                                resultado ==
-                                null
-                            ) {
-
-                                nombre = ""
-                                descripcion = ""
-                                materiaEditando =
-                                    null
-                                error = null
-
-                            } else {
-
-                                error =
-                                    resultado
-                            }
-                        }
+                        academicViewModel
+                            .guardarMateria()
                     },
                     modifier =
                         Modifier.fillMaxWidth(),
@@ -271,7 +217,8 @@ fun MateriasScreen(
                     Text(
                         text =
                             if (
-                                materiaEditando ==
+                                academicViewModel
+                                    .materiaEditando ==
                                 null
                             )
                                 "AGREGAR MATERIA"
@@ -281,19 +228,16 @@ fun MateriasScreen(
                 }
 
                 if (
-                    materiaEditando !=
+                    academicViewModel
+                        .materiaEditando !=
                     null
                 ) {
 
                     TextButton(
                         onClick = {
 
-                            materiaEditando =
-                                null
-
-                            nombre = ""
-                            descripcion = ""
-                            error = null
+                            academicViewModel
+                                .cancelarEdicionMateria()
                         },
                         modifier =
                             Modifier.fillMaxWidth()
@@ -326,9 +270,7 @@ fun MateriasScreen(
         )
 
         if (
-            AcademicRepository
-                .materias
-                .isEmpty()
+            materias.isEmpty()
         ) {
 
             Text(
@@ -349,8 +291,7 @@ fun MateriasScreen(
 
                 items(
                     items =
-                        AcademicRepository
-                            .materias,
+                        materias,
                     key = {
                         it.id
                     }
@@ -416,6 +357,7 @@ fun MateriasScreen(
 
                             Button(
                                 onClick = {
+
                                     onVerTemas(
                                         materia
                                     )
@@ -454,16 +396,10 @@ fun MateriasScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        materiaEditando =
-                                            materia
-
-                                        nombre =
-                                            materia.nombre
-
-                                        descripcion =
-                                            materia.descripcion
-
-                                        error = null
+                                        academicViewModel
+                                            .iniciarEdicionMateria(
+                                                materia
+                                            )
                                     },
                                     modifier =
                                         Modifier.weight(
@@ -471,16 +407,16 @@ fun MateriasScreen(
                                         )
                                 ) {
 
-                                    Text(
-                                        "Editar"
-                                    )
+                                    Text("Editar")
                                 }
 
                                 OutlinedButton(
                                     onClick = {
 
-                                        materiaAEliminar =
-                                            materia
+                                        academicViewModel
+                                            .solicitarEliminarMateria(
+                                                materia
+                                            )
                                     },
                                     modifier =
                                         Modifier.weight(
@@ -488,9 +424,7 @@ fun MateriasScreen(
                                         )
                                 ) {
 
-                                    Text(
-                                        "Eliminar"
-                                    )
+                                    Text("Eliminar")
                                 }
                             }
                         }
@@ -499,6 +433,10 @@ fun MateriasScreen(
             }
         }
     }
+
+    val materiaAEliminar =
+        academicViewModel
+            .materiaAEliminar
 
     if (
         materiaAEliminar !=
@@ -509,38 +447,16 @@ fun MateriasScreen(
             titulo =
                 "Eliminar materia",
             mensaje =
-                "¿Seguro que deseas eliminar \"${materiaAEliminar!!.nombre}\"? También se eliminarán sus temas y materiales.",
+                "¿Seguro que deseas eliminar \"${materiaAEliminar.nombre}\"? También se eliminarán sus temas y materiales.",
             onConfirm = {
 
-                val id =
-                    materiaAEliminar!!
-                        .id
-
-                AcademicRepository
-                    .eliminarMateria(
-                        id
-                    )
-
-                if (
-                    materiaEditando?.id ==
-                    id
-                ) {
-
-                    materiaEditando =
-                        null
-
-                    nombre = ""
-                    descripcion = ""
-                    error = null
-                }
-
-                materiaAEliminar =
-                    null
+                academicViewModel
+                    .confirmarEliminarMateria()
             },
             onDismiss = {
 
-                materiaAEliminar =
-                    null
+                academicViewModel
+                    .cancelarEliminarMateria()
             }
         )
     }

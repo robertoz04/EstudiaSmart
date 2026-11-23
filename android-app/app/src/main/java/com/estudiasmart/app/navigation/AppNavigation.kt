@@ -1,6 +1,12 @@
 package com.estudiasmart.app.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -22,210 +28,300 @@ fun AppNavigation() {
     val navController =
         rememberNavController()
 
+    val startDestination =
+        if (
+            AuthRepository
+                .haySesionActiva()
+        ) {
+            Routes.HOME
+        } else {
+            Routes.LOGIN
+        }
+
     NavHost(
-        navController = navController,
-        startDestination = "login"
+        navController =
+            navController,
+        startDestination =
+            startDestination
     ) {
 
-        // =========================
+        // =====================================================
         // LOGIN
-        // =========================
+        // =====================================================
 
-        composable("login") {
+        composable(
+            Routes.LOGIN
+        ) {
 
             LoginScreen(
                 onLoginSuccess = {
 
                     navController.navigate(
-                        "home"
+                        Routes.HOME
                     ) {
 
                         popUpTo(
-                            "login"
+                            Routes.LOGIN
                         ) {
-                            inclusive = true
+
+                            inclusive =
+                                true
                         }
 
-                        launchSingleTop = true
+                        launchSingleTop =
+                            true
                     }
                 },
                 onRegisterClick = {
 
                     navController.navigate(
-                        "register"
+                        Routes.REGISTER
                     )
                 }
             )
         }
 
-        // =========================
+        // =====================================================
         // REGISTRO
-        // =========================
+        // =====================================================
 
-        composable("register") {
+        composable(
+            Routes.REGISTER
+        ) {
 
             RegisterScreen(
                 onRegisterSuccess = {
 
                     navController.navigate(
-                        "home"
+                        Routes.HOME
                     ) {
 
                         popUpTo(
-                            "register"
+                            Routes.REGISTER
                         ) {
-                            inclusive = true
+
+                            inclusive =
+                                true
                         }
 
-                        launchSingleTop = true
+                        launchSingleTop =
+                            true
                     }
                 },
                 onBackToLogin = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 }
             )
         }
 
-        // =========================
-        // HOME / DASHBOARD
-        // =========================
+        // =====================================================
+        // HOME
+        // =====================================================
 
-        composable("home") {
+        composable(
+            Routes.HOME
+        ) {
 
-            HomeScreen(
-                onMateriasClick = {
+            MainScreenLayout(
+                navController =
+                    navController
+            ) {
 
-                    navController.navigate(
-                        "materias"
-                    )
-                },
-                onFlashcardsClick = {
+                HomeScreen(
+                    onMateriasClick = {
 
-                    navController.navigate(
-                        "flashcards"
-                    )
-                },
-                onQuizClick = {
+                        navegarPrincipal(
+                            navController,
+                            Routes.MATERIAS
+                        )
+                    },
+                    onFlashcardsClick = {
 
-                    navController.navigate(
-                        "quiz"
-                    )
-                },
-                onProgresoClick = {
+                        navegarPrincipal(
+                            navController,
+                            Routes.FLASHCARDS
+                        )
+                    },
+                    onQuizClick = {
 
-                    navController.navigate(
-                        "progreso"
-                    )
-                },
-                onRecomendacionesClick = {
+                        navegarPrincipal(
+                            navController,
+                            Routes.QUIZ
+                        )
+                    },
+                    onProgresoClick = {
 
-                    navController.navigate(
-                        "recomendaciones"
-                    )
-                },
-                onLogoutClick = {
+                        navegarPrincipal(
+                            navController,
+                            Routes.PROGRESO
+                        )
+                    },
+                    onRecomendacionesClick = {
 
-                    AuthRepository.cerrarSesion()
+                        navController.navigate(
+                            Routes.RECOMENDACIONES
+                        )
+                    },
+                    onLogoutClick = {
 
-                    navController.navigate(
-                        "login"
-                    ) {
+                        AuthRepository
+                            .cerrarSesion()
 
-                        popUpTo(
-                            "home"
+                        navController.navigate(
+                            Routes.LOGIN
                         ) {
-                            inclusive = true
+
+                            popUpTo(
+                                Routes.HOME
+                            ) {
+
+                                inclusive =
+                                    true
+                            }
+
+                            launchSingleTop =
+                                true
                         }
-
-                        launchSingleTop = true
                     }
-                }
-            )
+                )
+            }
         }
 
-        // =========================
+        // =====================================================
+        // MATERIAS
+        // =====================================================
+
+        composable(
+            Routes.MATERIAS
+        ) {
+
+            MainScreenLayout(
+                navController =
+                    navController
+            ) {
+
+                MateriasScreen(
+                    onBack = {
+
+                        navegarPrincipal(
+                            navController,
+                            Routes.HOME
+                        )
+                    },
+                    onVerTemas = {
+                            materia ->
+
+                        navController.navigate(
+                            Routes.temas(
+                                materia.id
+                            )
+                        )
+                    }
+                )
+            }
+        }
+
+        // =====================================================
         // FLASHCARDS
-        // =========================
+        // =====================================================
 
-        composable("flashcards") {
+        composable(
+            Routes.FLASHCARDS
+        ) {
 
-            FlashcardsScreen(
-                onBack = {
+            MainScreenLayout(
+                navController =
+                    navController
+            ) {
 
-                    navController.popBackStack()
-                }
-            )
+                FlashcardsScreen(
+                    onBack = {
+
+                        navegarPrincipal(
+                            navController,
+                            Routes.HOME
+                        )
+                    }
+                )
+            }
         }
 
-        // =========================
+        // =====================================================
         // QUIZ
-        // =========================
+        // =====================================================
 
-        composable("quiz") {
+        composable(
+            Routes.QUIZ
+        ) {
 
-            QuizScreen(
-                onBack = {
+            MainScreenLayout(
+                navController =
+                    navController
+            ) {
 
-                    navController.popBackStack()
-                }
-            )
+                QuizScreen(
+                    onBack = {
+
+                        navegarPrincipal(
+                            navController,
+                            Routes.HOME
+                        )
+                    }
+                )
+            }
         }
 
-        // =========================
+        // =====================================================
         // PROGRESO
-        // =========================
+        // =====================================================
 
-        composable("progreso") {
+        composable(
+            Routes.PROGRESO
+        ) {
 
-            ProgresoScreen(
-                onBack = {
+            MainScreenLayout(
+                navController =
+                    navController
+            ) {
 
-                    navController.popBackStack()
-                }
-            )
+                ProgresoScreen(
+                    onBack = {
+
+                        navegarPrincipal(
+                            navController,
+                            Routes.HOME
+                        )
+                    }
+                )
+            }
         }
 
-        // =========================
+        // =====================================================
         // RECOMENDACIONES
-        // =========================
+        // =====================================================
 
-        composable("recomendaciones") {
+        composable(
+            Routes.RECOMENDACIONES
+        ) {
 
             RecomendacionesScreen(
                 onBack = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 }
             )
         }
 
-        // =========================
-        // MATERIAS
-        // =========================
-
-        composable("materias") {
-
-            MateriasScreen(
-                onBack = {
-
-                    navController.popBackStack()
-                },
-                onVerTemas = { materia ->
-
-                    navController.navigate(
-                        "temas/${materia.id}"
-                    )
-                }
-            )
-        }
-
-        // =========================
+        // =====================================================
         // TEMAS
-        // =========================
+        // =====================================================
 
         composable(
-            route = "temas/{materiaId}"
+            route =
+                Routes.TEMAS
         ) { backStackEntry ->
 
             val materiaId =
@@ -238,26 +334,32 @@ fun AppNavigation() {
                     ?: 0
 
             TemasScreen(
-                materiaId = materiaId,
+                materiaId =
+                    materiaId,
                 onBack = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 },
-                onVerMateriales = { tema ->
+                onVerMateriales = {
+                        tema ->
 
                     navController.navigate(
-                        "materiales/${tema.id}"
+                        Routes.materiales(
+                            tema.id
+                        )
                     )
                 }
             )
         }
 
-        // =========================
+        // =====================================================
         // MATERIALES
-        // =========================
+        // =====================================================
 
         composable(
-            route = "materiales/{temaId}"
+            route =
+                Routes.MATERIALES
         ) { backStackEntry ->
 
             val temaId =
@@ -270,12 +372,81 @@ fun AppNavigation() {
                     ?: 0
 
             MaterialesScreen(
-                temaId = temaId,
+                temaId =
+                    temaId,
                 onBack = {
 
-                    navController.popBackStack()
+                    navController
+                        .popBackStack()
                 }
             )
         }
+    }
+}
+
+// =============================================================
+// CONTENEDOR DE LAS PANTALLAS PRINCIPALES
+// =============================================================
+
+@Composable
+private fun MainScreenLayout(
+    navController:
+    NavHostController,
+    content:
+    @Composable () -> Unit
+) {
+
+    Scaffold(
+        modifier =
+            Modifier.fillMaxSize(),
+        bottomBar = {
+
+            MainBottomBar(
+                navController =
+                    navController
+            )
+        }
+    ) { innerPadding ->
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    innerPadding
+                )
+        ) {
+
+            content()
+        }
+    }
+}
+
+// =============================================================
+// NAVEGACIÓN ENTRE MÓDULOS PRINCIPALES
+// =============================================================
+
+private fun navegarPrincipal(
+    navController:
+    NavHostController,
+    route: String
+) {
+
+    navController.navigate(
+        route
+    ) {
+
+        popUpTo(
+            Routes.HOME
+        ) {
+
+            saveState =
+                true
+        }
+
+        launchSingleTop =
+            true
+
+        restoreState =
+            true
     }
 }

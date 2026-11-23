@@ -1,6 +1,5 @@
 package com.estudiasmart.app.ui.screens
 
-import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,10 +21,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,53 +29,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AuthRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.estudiasmart.app.viewmodel.AuthViewModel
 
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit,
+    authViewModel: AuthViewModel = viewModel()
 ) {
-
-    var nombre by remember {
-        mutableStateOf("")
-    }
-
-    var correo by remember {
-        mutableStateOf("")
-    }
-
-    var contrasena by remember {
-        mutableStateOf("")
-    }
-
-    var confirmarContrasena by remember {
-        mutableStateOf("")
-    }
-
-    var errorNombre by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var errorCorreo by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var errorContrasena by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var errorConfirmacion by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var errorGeneral by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var cargando by remember {
-        mutableStateOf(false)
-    }
 
     val colorPrincipal =
         Color(0xFF4F46E5)
@@ -124,7 +81,8 @@ fun RegisterScreen(
                 "Crea tu cuenta y comienza a estudiar",
             fontSize = 15.sp,
             color = Color.Gray,
-            textAlign = TextAlign.Center
+            textAlign =
+                TextAlign.Center
         )
 
         Spacer(
@@ -155,7 +113,8 @@ fun RegisterScreen(
             ) {
 
                 Text(
-                    text = "Crear cuenta",
+                    text =
+                        "Crear cuenta",
                     style =
                         MaterialTheme
                             .typography
@@ -180,14 +139,20 @@ fun RegisterScreen(
                         Modifier.height(20.dp)
                 )
 
+                // =============================================
+                // NOMBRE
+                // =============================================
+
                 OutlinedTextField(
-                    value = nombre,
+                    value =
+                        authViewModel
+                            .nombreRegistro,
                     onValueChange = {
 
-                        nombre = it
-
-                        errorNombre = null
-                        errorGeneral = null
+                        authViewModel
+                            .cambiarNombreRegistro(
+                                it
+                            )
                     },
                     label = {
                         Text(
@@ -199,29 +164,41 @@ fun RegisterScreen(
                             "Ej. Beatriz Pérez"
                         )
                     },
-                    enabled = !cargando,
+                    enabled =
+                        !authViewModel
+                            .cargandoRegistro,
                     isError =
-                        errorNombre != null,
+                        authViewModel
+                            .errorNombreRegistro !=
+                                null,
                     supportingText = {
 
-                        errorNombre?.let {
+                        authViewModel
+                            .errorNombreRegistro
+                            ?.let {
 
-                            Text(it)
-                        }
+                                Text(it)
+                            }
                     },
                     singleLine = true,
                     modifier =
                         Modifier.fillMaxWidth()
                 )
 
+                // =============================================
+                // CORREO
+                // =============================================
+
                 OutlinedTextField(
-                    value = correo,
+                    value =
+                        authViewModel
+                            .correoRegistro,
                     onValueChange = {
 
-                        correo = it
-
-                        errorCorreo = null
-                        errorGeneral = null
+                        authViewModel
+                            .cambiarCorreoRegistro(
+                                it
+                            )
                     },
                     label = {
                         Text(
@@ -233,69 +210,84 @@ fun RegisterScreen(
                             "correo@ejemplo.com"
                         )
                     },
-                    enabled = !cargando,
+                    enabled =
+                        !authViewModel
+                            .cargandoRegistro,
                     isError =
-                        errorCorreo != null,
+                        authViewModel
+                            .errorCorreoRegistro !=
+                                null,
                     supportingText = {
 
-                        errorCorreo?.let {
+                        authViewModel
+                            .errorCorreoRegistro
+                            ?.let {
 
-                            Text(it)
-                        }
+                                Text(it)
+                            }
                     },
                     singleLine = true,
                     modifier =
                         Modifier.fillMaxWidth()
                 )
 
-                OutlinedTextField(
-                    value = contrasena,
-                    onValueChange = {
-
-                        contrasena = it
-
-                        errorContrasena =
-                            null
-
-                        errorConfirmacion =
-                            null
-
-                        errorGeneral =
-                            null
-                    },
-                    label = {
-                        Text("Contraseña")
-                    },
-                    visualTransformation =
-                        PasswordVisualTransformation(),
-                    enabled = !cargando,
-                    isError =
-                        errorContrasena != null,
-                    supportingText = {
-
-                        errorContrasena?.let {
-
-                            Text(it)
-                        }
-                    },
-                    singleLine = true,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                )
+                // =============================================
+                // CONTRASEÑA
+                // =============================================
 
                 OutlinedTextField(
                     value =
-                        confirmarContrasena,
+                        authViewModel
+                            .contrasenaRegistro,
                     onValueChange = {
 
-                        confirmarContrasena =
-                            it
+                        authViewModel
+                            .cambiarContrasenaRegistro(
+                                it
+                            )
+                    },
+                    label = {
+                        Text(
+                            "Contraseña"
+                        )
+                    },
+                    visualTransformation =
+                        PasswordVisualTransformation(),
+                    enabled =
+                        !authViewModel
+                            .cargandoRegistro,
+                    isError =
+                        authViewModel
+                            .errorContrasenaRegistro !=
+                                null,
+                    supportingText = {
 
-                        errorConfirmacion =
-                            null
+                        authViewModel
+                            .errorContrasenaRegistro
+                            ?.let {
 
-                        errorGeneral =
-                            null
+                                Text(it)
+                            }
+                    },
+                    singleLine = true,
+                    modifier =
+                        Modifier.fillMaxWidth()
+                )
+
+                // =============================================
+                // CONFIRMAR CONTRASEÑA
+                // =============================================
+
+                OutlinedTextField(
+                    value =
+                        authViewModel
+                            .confirmarContrasenaRegistro,
+                    onValueChange = {
+
+                        authViewModel
+                            .cambiarConfirmacionRegistro(
+                                it
+                            )
                     },
                     label = {
                         Text(
@@ -304,213 +296,77 @@ fun RegisterScreen(
                     },
                     visualTransformation =
                         PasswordVisualTransformation(),
-                    enabled = !cargando,
+                    enabled =
+                        !authViewModel
+                            .cargandoRegistro,
                     isError =
-                        errorConfirmacion != null,
+                        authViewModel
+                            .errorConfirmacionRegistro !=
+                                null,
                     supportingText = {
 
-                        errorConfirmacion?.let {
+                        authViewModel
+                            .errorConfirmacionRegistro
+                            ?.let {
 
-                            Text(it)
-                        }
+                                Text(it)
+                            }
                     },
                     singleLine = true,
                     modifier =
                         Modifier.fillMaxWidth()
                 )
 
-                if (errorGeneral != null) {
+                // =============================================
+                // ERROR GENERAL
+                // =============================================
 
-                    Spacer(
-                        modifier =
-                            Modifier.height(8.dp)
-                    )
+                authViewModel
+                    .errorRegistroGeneral
+                    ?.let {
 
-                    Text(
-                        text =
-                            errorGeneral!!,
-                        color =
-                            MaterialTheme
-                                .colorScheme
-                                .error,
-                        modifier =
-                            Modifier.fillMaxWidth(),
-                        textAlign =
-                            TextAlign.Center
-                    )
-                }
+                        Spacer(
+                            modifier =
+                                Modifier.height(
+                                    8.dp
+                                )
+                        )
+
+                        Text(
+                            text = it,
+                            color =
+                                MaterialTheme
+                                    .colorScheme
+                                    .error,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
+                            textAlign =
+                                TextAlign.Center
+                        )
+                    }
 
                 Spacer(
                     modifier =
                         Modifier.height(20.dp)
                 )
 
+                // =============================================
+                // CREAR CUENTA
+                // =============================================
+
                 Button(
                     onClick = {
 
-                        errorNombre = null
-                        errorCorreo = null
-                        errorContrasena = null
-                        errorConfirmacion = null
-                        errorGeneral = null
-
-                        val nombreLimpio =
-                            nombre.trim()
-
-                        val correoLimpio =
-                            correo
-                                .trim()
-                                .lowercase()
-
-                        var formularioValido =
-                            true
-
-                        // =========================
-                        // VALIDAR NOMBRE
-                        // =========================
-
-                        if (
-                            nombreLimpio.isBlank()
-                        ) {
-
-                            errorNombre =
-                                "El nombre es obligatorio."
-
-                            formularioValido =
-                                false
-
-                        } else if (
-                            nombreLimpio.length < 3
-                        ) {
-
-                            errorNombre =
-                                "El nombre debe tener al menos 3 caracteres."
-
-                            formularioValido =
-                                false
-                        }
-
-                        // =========================
-                        // VALIDAR CORREO
-                        // =========================
-
-                        if (
-                            correoLimpio.isBlank()
-                        ) {
-
-                            errorCorreo =
-                                "El correo es obligatorio."
-
-                            formularioValido =
-                                false
-
-                        } else if (
-                            !Patterns
-                                .EMAIL_ADDRESS
-                                .matcher(
-                                    correoLimpio
-                                )
-                                .matches()
-                        ) {
-
-                            errorCorreo =
-                                "Ingrese un correo válido."
-
-                            formularioValido =
-                                false
-                        }
-
-                        // =========================
-                        // VALIDAR CONTRASEÑA
-                        // =========================
-
-                        if (
-                            contrasena.isBlank()
-                        ) {
-
-                            errorContrasena =
-                                "La contraseña es obligatoria."
-
-                            formularioValido =
-                                false
-
-                        } else if (
-                            contrasena.length < 6
-                        ) {
-
-                            errorContrasena =
-                                "Debe tener al menos 6 caracteres."
-
-                            formularioValido =
-                                false
-                        }
-
-                        // =========================
-                        // CONFIRMAR CONTRASEÑA
-                        // =========================
-
-                        if (
-                            confirmarContrasena
-                                .isBlank()
-                        ) {
-
-                            errorConfirmacion =
-                                "Confirme su contraseña."
-
-                            formularioValido =
-                                false
-
-                        } else if (
-                            confirmarContrasena !=
-                            contrasena
-                        ) {
-
-                            errorConfirmacion =
-                                "Las contraseñas no coinciden."
-
-                            formularioValido =
-                                false
-                        }
-
-                        // =========================
-                        // REGISTRO FIREBASE
-                        // =========================
-
-                        if (
-                            formularioValido
-                        ) {
-
-                            cargando = true
-
-                            AuthRepository
-                                .registrar(
-                                    nombre =
-                                        nombreLimpio,
-                                    correo =
-                                        correoLimpio,
-                                    contrasena =
-                                        contrasena
-                                ) { resultado ->
-
-                                    cargando =
-                                        false
-
-                                    if (
-                                        resultado ==
-                                        null
-                                    ) {
-
-                                        onRegisterSuccess()
-
-                                    } else {
-
-                                        errorGeneral =
-                                            resultado
-                                    }
-                                }
-                        }
+                        authViewModel
+                            .registrar(
+                                onSuccess =
+                                    onRegisterSuccess
+                            )
                     },
-                    enabled = !cargando,
+                    enabled =
+                        !authViewModel
+                            .cargandoRegistro,
                     modifier =
                         Modifier.fillMaxWidth(),
                     shape =
@@ -525,17 +381,23 @@ fun RegisterScreen(
                             )
                 ) {
 
-                    if (cargando) {
+                    if (
+                        authViewModel
+                            .cargandoRegistro
+                    ) {
 
                         CircularProgressIndicator(
                             modifier =
                                 Modifier
                                     .height(22.dp)
                                     .padding(
-                                        end = 6.dp
+                                        end =
+                                            6.dp
                                     ),
-                            strokeWidth = 2.dp,
-                            color = Color.White
+                            strokeWidth =
+                                2.dp,
+                            color =
+                                Color.White
                         )
 
                         Text(
@@ -565,7 +427,8 @@ fun RegisterScreen(
                     onClick =
                         onBackToLogin,
                     enabled =
-                        !cargando,
+                        !authViewModel
+                            .cargandoRegistro,
                     modifier =
                         Modifier.fillMaxWidth()
                 ) {

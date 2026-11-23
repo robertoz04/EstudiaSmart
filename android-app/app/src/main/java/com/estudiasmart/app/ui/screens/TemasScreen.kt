@@ -21,30 +21,31 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.estudiasmart.app.data.AcademicRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.estudiasmart.app.model.Tema
 import com.estudiasmart.app.ui.components.ConfirmDeleteDialog
+import com.estudiasmart.app.viewmodel.AcademicViewModel
 
 @Composable
 fun TemasScreen(
     materiaId: Int,
     onBack: () -> Unit,
-    onVerMateriales: (Tema) -> Unit
+    onVerMateriales: (Tema) -> Unit,
+    academicViewModel:
+    AcademicViewModel =
+        viewModel()
 ) {
 
     val materia =
-        AcademicRepository.obtenerMateria(
-            materiaId
-        )
+        academicViewModel
+            .obtenerMateria(
+                materiaId
+            )
 
     if (materia == null) {
 
@@ -55,7 +56,8 @@ fun TemasScreen(
         ) {
 
             Text(
-                text = "Materia no encontrada."
+                text =
+                    "Materia no encontrada."
             )
 
             TextButton(
@@ -68,25 +70,11 @@ fun TemasScreen(
         return
     }
 
-    var nombre by remember {
-        mutableStateOf("")
-    }
-
-    var descripcion by remember {
-        mutableStateOf("")
-    }
-
-    var error by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var temaEditando by remember {
-        mutableStateOf<Tema?>(null)
-    }
-
-    var temaAEliminar by remember {
-        mutableStateOf<Tema?>(null)
-    }
+    val temas =
+        academicViewModel
+            .temasPorMateria(
+                materiaId
+            )
 
     val colorPrincipal =
         Color(0xFF4F46E5)
@@ -104,225 +92,242 @@ fun TemasScreen(
         TextButton(
             onClick = onBack
         ) {
-            Text("← Volver a materias")
+            Text(
+                "← Volver a materias"
+            )
         }
 
         Text(
             text = "Temas",
             fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorPrincipal
+            fontWeight =
+                FontWeight.Bold,
+            color =
+                colorPrincipal
         )
 
         Text(
-            text = materia.nombre,
+            text =
+                materia.nombre,
             fontSize = 17.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight =
+                FontWeight.Medium
         )
 
         Text(
             text =
                 "Organiza los contenidos que estudiarás.",
-            color = Color.Gray
+            color =
+                Color.Gray
         )
 
         Spacer(
-            modifier = Modifier.height(18.dp)
+            modifier =
+                Modifier.height(18.dp)
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 3.dp
-            )
+            modifier =
+                Modifier.fillMaxWidth(),
+            shape =
+                RoundedCornerShape(20.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        Color.White
+                ),
+            elevation =
+                CardDefaults.cardElevation(
+                    defaultElevation =
+                        3.dp
+                )
         ) {
 
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier =
+                    Modifier.padding(20.dp)
             ) {
 
                 Text(
                     text =
-                        if (temaEditando == null)
+                        if (
+                            academicViewModel
+                                .temaEditando ==
+                            null
+                        )
                             "Nuevo tema"
                         else
                             "Editar tema",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight =
+                        FontWeight.Bold
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier =
+                        Modifier.height(12.dp)
                 )
 
                 OutlinedTextField(
-                    value = nombre,
+                    value =
+                        academicViewModel
+                            .nombreTema,
                     onValueChange = {
-                        nombre = it
-                        error = null
+
+                        academicViewModel
+                            .cambiarNombreTema(
+                                it
+                            )
                     },
                     label = {
-                        Text("Nombre del tema")
+                        Text(
+                            "Nombre del tema"
+                        )
                     },
                     placeholder = {
-                        Text("Ej. Jetpack Compose")
+                        Text(
+                            "Ej. Jetpack Compose"
+                        )
                     },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
                 Spacer(
-                    modifier = Modifier.height(10.dp)
+                    modifier =
+                        Modifier.height(10.dp)
                 )
 
                 OutlinedTextField(
-                    value = descripcion,
+                    value =
+                        academicViewModel
+                            .descripcionTema,
                     onValueChange = {
-                        descripcion = it
+
+                        academicViewModel
+                            .cambiarDescripcionTema(
+                                it
+                            )
                     },
                     label = {
                         Text("Descripción")
                     },
                     placeholder = {
-                        Text("Descripción del tema")
+                        Text(
+                            "Descripción del tema"
+                        )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier =
+                        Modifier.fillMaxWidth()
                 )
 
-                if (error != null) {
+                academicViewModel
+                    .errorTema
+                    ?.let {
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+                        Spacer(
+                            modifier =
+                                Modifier.height(
+                                    8.dp
+                                )
+                        )
 
-                    Text(
-                        text = error!!,
-                        color = Color(0xFFB3261E)
-                    )
-                }
+                        Text(
+                            text = it,
+                            color =
+                                Color(
+                                    0xFFB3261E
+                                )
+                        )
+                    }
 
                 Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier =
+                        Modifier.height(16.dp)
                 )
 
                 Button(
                     onClick = {
 
-                        if (temaEditando == null) {
-
-                            val resultado =
-                                AcademicRepository
-                                    .crearTema(
-                                        materiaId =
-                                            materiaId,
-                                        nombre =
-                                            nombre,
-                                        descripcion =
-                                            descripcion
-                                    )
-
-                            if (resultado == null) {
-
-                                nombre = ""
-                                descripcion = ""
-                                error = null
-
-                            } else {
-
-                                error = resultado
-                            }
-
-                        } else {
-
-                            val resultado =
-                                AcademicRepository
-                                    .actualizarTema(
-                                        id =
-                                            temaEditando!!.id,
-                                        nombre =
-                                            nombre,
-                                        descripcion =
-                                            descripcion
-                                    )
-
-                            if (resultado == null) {
-
-                                nombre = ""
-                                descripcion = ""
-                                temaEditando = null
-                                error = null
-
-                            } else {
-
-                                error = resultado
-                            }
-                        }
+                        academicViewModel
+                            .guardarTema(
+                                materiaId
+                            )
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor =
-                            colorPrincipal
-                    )
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    colorPrincipal
+                            )
                 ) {
 
                     Text(
-                        if (temaEditando == null)
+                        if (
+                            academicViewModel
+                                .temaEditando ==
+                            null
+                        )
                             "AGREGAR TEMA"
                         else
                             "GUARDAR CAMBIOS"
                     )
                 }
 
-                if (temaEditando != null) {
+                if (
+                    academicViewModel
+                        .temaEditando !=
+                    null
+                ) {
 
                     TextButton(
                         onClick = {
 
-                            temaEditando = null
-                            nombre = ""
-                            descripcion = ""
-                            error = null
+                            academicViewModel
+                                .cancelarEdicionTema()
                         },
                         modifier =
                             Modifier.fillMaxWidth()
                     ) {
 
-                        Text("Cancelar edición")
+                        Text(
+                            "Cancelar edición"
+                        )
                     }
                 }
             }
         }
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier =
+                Modifier.height(20.dp)
         )
 
         Text(
-            text = "Temas registrados",
+            text =
+                "Temas registrados",
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight =
+                FontWeight.Bold
         )
 
         Spacer(
-            modifier = Modifier.height(10.dp)
+            modifier =
+                Modifier.height(10.dp)
         )
 
-        val temas =
-            AcademicRepository
-                .temasPorMateria(
-                    materiaId
-                )
-
-        if (temas.isEmpty()) {
+        if (
+            temas.isEmpty()
+        ) {
 
             Text(
                 text =
                     "Todavía no hay temas en esta materia.",
-                color = Color.Gray
+                color =
+                    Color.Gray
             )
 
         } else {
@@ -335,7 +340,8 @@ fun TemasScreen(
             ) {
 
                 items(
-                    items = temas,
+                    items =
+                        temas,
                     key = {
                         it.id
                     }
@@ -349,10 +355,11 @@ fun TemasScreen(
                                 16.dp
                             ),
                         colors =
-                            CardDefaults.cardColors(
-                                containerColor =
-                                    Color.White
-                            )
+                            CardDefaults
+                                .cardColors(
+                                    containerColor =
+                                        Color.White
+                                )
                     ) {
 
                         Column(
@@ -363,8 +370,10 @@ fun TemasScreen(
                         ) {
 
                             Text(
-                                text = tema.nombre,
-                                fontSize = 18.sp,
+                                text =
+                                    tema.nombre,
+                                fontSize =
+                                    18.sp,
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -384,7 +393,8 @@ fun TemasScreen(
                                 Text(
                                     text =
                                         tema.descripcion,
-                                    color = Color.Gray
+                                    color =
+                                        Color.Gray
                                 )
                             }
 
@@ -436,19 +446,15 @@ fun TemasScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        temaEditando =
-                                            tema
-
-                                        nombre =
-                                            tema.nombre
-
-                                        descripcion =
-                                            tema.descripcion
-
-                                        error = null
+                                        academicViewModel
+                                            .iniciarEdicionTema(
+                                                tema
+                                            )
                                     },
                                     modifier =
-                                        Modifier.weight(1f)
+                                        Modifier.weight(
+                                            1f
+                                        )
                                 ) {
 
                                     Text("Editar")
@@ -457,11 +463,15 @@ fun TemasScreen(
                                 OutlinedButton(
                                     onClick = {
 
-                                        temaAEliminar =
-                                            tema
+                                        academicViewModel
+                                            .solicitarEliminarTema(
+                                                tema
+                                            )
                                     },
                                     modifier =
-                                        Modifier.weight(1f)
+                                        Modifier.weight(
+                                            1f
+                                        )
                                 ) {
 
                                     Text("Eliminar")
@@ -474,39 +484,29 @@ fun TemasScreen(
         }
     }
 
-    if (temaAEliminar != null) {
+    val temaAEliminar =
+        academicViewModel
+            .temaAEliminar
+
+    if (
+        temaAEliminar !=
+        null
+    ) {
 
         ConfirmDeleteDialog(
             titulo =
                 "Eliminar tema",
             mensaje =
-                "¿Seguro que deseas eliminar \"${temaAEliminar!!.nombre}\"? También se eliminarán los materiales asociados.",
+                "¿Seguro que deseas eliminar \"${temaAEliminar.nombre}\"? También se eliminarán los materiales asociados.",
             onConfirm = {
 
-                val id =
-                    temaAEliminar!!.id
-
-                AcademicRepository
-                    .eliminarTema(
-                        id
-                    )
-
-                if (
-                    temaEditando?.id ==
-                    id
-                ) {
-
-                    temaEditando = null
-                    nombre = ""
-                    descripcion = ""
-                    error = null
-                }
-
-                temaAEliminar = null
+                academicViewModel
+                    .confirmarEliminarTema()
             },
             onDismiss = {
 
-                temaAEliminar = null
+                academicViewModel
+                    .cancelarEliminarTema()
             }
         )
     }
