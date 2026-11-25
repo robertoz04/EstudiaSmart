@@ -456,15 +456,21 @@ Incluye:
 
 # 🎥 Video de demostración / defensa
 
-El video correspondiente a la entrega final será incorporado antes de la entrega definitiva.
+Como parte de la entrega final de **EstudiaSmart** se realizó un video de demostración y defensa del proyecto.
 
-```text
-VIDEO FINAL: PENDIENTE DE AGREGAR
-```
+En el video se presenta:
 
-Cuando el video se encuentre publicado, este apartado se actualizará con el enlace correspondiente.
+- objetivo y funcionamiento general de EstudiaSmart;
+- arquitectura y organización del código;
+- autenticación mediante Firebase;
+- persistencia con Cloud Firestore;
+- gestión de materias, temas y materiales;
+- flashcards y repetición espaciada;
+- quizzes e historial de resultados;
+- progreso y recomendaciones;
+- demostración del funcionamiento final de la aplicación.
 
----
+🎥 [Ver video final de EstudiaSmart](https://canva.link/7eypir4xdl5djsl)
 
 # 🧪 Pruebas realizadas
 
